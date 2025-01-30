@@ -1,4 +1,4 @@
-namespace IdentityService.Application.Services;
+namespace IdentityService.Application.Services.Interfaces;
 
 public interface ITokenService
 {

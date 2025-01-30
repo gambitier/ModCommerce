@@ -1,5 +1,5 @@
 using IdentityService.Domain.Entities;
-using IdentityService.Application.Services;
+using IdentityService.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using IdentityService.API.Contracts.Auth;
 

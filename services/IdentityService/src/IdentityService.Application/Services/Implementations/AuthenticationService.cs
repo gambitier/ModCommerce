@@ -1,8 +1,10 @@
+using IdentityService.Application.Models;
+using IdentityService.Application.Services.Interfaces;
 using IdentityService.Domain.Entities;
 using IdentityService.Infrastructure.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace IdentityService.Application.Services;
+namespace IdentityService.Application.Services.Implementations;
 
 public class AuthenticationService : IAuthenticationService
 {
@@ -20,7 +22,7 @@ public class AuthenticationService : IAuthenticationService
         _tokenService = tokenService;
     }
 
-    public async Task<AuthResult> RegisterUserAsync(DomainUser domainUser, string password)
+    public async Task<AuthResultDto> RegisterUserAsync(DomainUser domainUser, string password)
     {
         var user = new User
         {
@@ -34,26 +36,26 @@ public class AuthenticationService : IAuthenticationService
 
         if (!result.Succeeded)
         {
-            return new AuthResult
+            return new AuthResultDto
             {
                 Succeeded = false,
                 Errors = result.Errors.Select(e => e.Description)
             };
         }
 
-        return new AuthResult
+        return new AuthResultDto
         {
             Succeeded = true,
             Token = _tokenService.GenerateJwtToken(user.Id, user.Email)
         };
     }
 
-    public async Task<AuthResult> AuthenticateAsync(string email, string password)
+    public async Task<AuthResultDto> AuthenticateAsync(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
         {
-            return new AuthResult
+            return new AuthResultDto
             {
                 Succeeded = false,
                 Errors = new[] { "Invalid credentials" }
@@ -63,14 +65,14 @@ public class AuthenticationService : IAuthenticationService
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
         if (!result.Succeeded)
         {
-            return new AuthResult
+            return new AuthResultDto
             {
                 Succeeded = false,
                 Errors = new[] { "Invalid credentials" }
             };
         }
 
-        return new AuthResult
+        return new AuthResultDto
         {
             Succeeded = true,
             Token = _tokenService.GenerateJwtToken(user.Id, email)
