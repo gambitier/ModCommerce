@@ -3,16 +3,17 @@ using System.Security.Claims;
 using System.Text;
 using IdentityService.Application.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 
 namespace IdentityService.Application.Services;
 
-public class TokenService
+public class TokenService : ITokenService
 {
     private readonly JwtOptions _jwtOptions;
 
-    public TokenService(JwtOptions jwtOptions)
+    public TokenService(IOptions<JwtOptions> jwtOptions)
     {
-        _jwtOptions = jwtOptions;
+        _jwtOptions = jwtOptions.Value;
     }
 
     public string GenerateJwtToken(string userId, string email)
