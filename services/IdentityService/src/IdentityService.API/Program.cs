@@ -1,3 +1,4 @@
+using IdentityService.Infrastructure.Extensions;
 using IdentityService.API.Extensions;
 using Scalar.AspNetCore;
 
@@ -7,7 +8,8 @@ builder.Services.AddOptions(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
-builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration.GetJwtOptions());
+builder.Services.AddIdentityInfrastructure(builder.Configuration.GetDatabaseOptions());
 
 var app = builder.Build();
 

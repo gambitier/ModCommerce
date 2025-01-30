@@ -8,11 +8,8 @@ namespace IdentityService.API.Extensions;
 
 public static class JwtAuthenticationExtensions
 {
-    public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static void AddJwtAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
     {
-        var jwtOptions = configuration.GetSection(ConfigurationConstants.JwtSection).Get<JwtOptions>()
-            ?? throw new InvalidOperationException("JWT options are not configured");
-
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
