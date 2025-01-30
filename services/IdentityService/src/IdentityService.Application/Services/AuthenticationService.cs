@@ -73,7 +73,7 @@ public class AuthenticationService : IAuthenticationService
         return new AuthResult
         {
             Succeeded = true,
-            Token = _tokenService.GenerateJwtToken(user.Id, user.Email)
+            Token = _tokenService.GenerateJwtToken(user.Id, email)
         };
     }
 }
