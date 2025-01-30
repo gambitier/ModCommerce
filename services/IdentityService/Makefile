@@ -7,6 +7,9 @@ GREEN := \033[0;32m
 NC := \033[0m # No Color
 INFO := ${GREEN}==${NC}
 
+# Default target
+.DEFAULT_GOAL := help
+
 # Install EF Core tools
 install-ef:
 	@echo "${INFO} Installing Entity Framework Core tools..."
@@ -55,14 +58,14 @@ drop-database:
 # Help command
 help:
 	@echo "Available commands:"
-	@echo "  make install-ef          - Install Entity Framework Core tools"
-	@echo "  make update-ef           - Update Entity Framework Core tools"
+	@echo "  make install-ef                       - Install Entity Framework Core tools"
+	@echo "  make update-ef                        - Update Entity Framework Core tools"
 	@echo "  make add-migration name=MigrationName - Add new migration"
-	@echo "  make remove-migration    - Remove last migration"
-	@echo "  make list-migrations     - List all migrations"
-	@echo "  make update-database     - Update database to latest migration"
-	@echo "  make generate-script     - Generate SQL script"
-	@echo "  make drop-database       - Drop the database"
-	@echo "  make help               - Show this help message"
+	@echo "  make remove-migration                 - Remove last migration"
+	@echo "  make list-migrations                  - List all migrations"
+	@echo "  make update-database                  - Update database to latest migration"
+	@echo "  make generate-script                  - Generate SQL script"
+	@echo "  make drop-database                    - Drop the database"
+	@echo "  make help                             - Show this help message"
 
 .PHONY: install-ef update-ef add-migration remove-migration list-migrations update-database generate-script drop-database help 
