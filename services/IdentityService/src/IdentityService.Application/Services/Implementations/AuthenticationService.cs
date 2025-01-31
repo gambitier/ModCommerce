@@ -1,81 +1,55 @@
 using IdentityService.Application.Models;
 using IdentityService.Application.Services.Interfaces;
-using IdentityService.Domain.Entities;
-using IdentityService.Infrastructure.Entities;
-using Microsoft.AspNetCore.Identity;
+using IdentityService.Domain.DomainModels;
+using IdentityService.Domain.Interfaces.Repositories;
 
 namespace IdentityService.Application.Services.Implementations;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
+    private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
 
     public AuthenticationService(
-        UserManager<User> userManager,
-        SignInManager<User> signInManager,
+        IUserRepository userRepository,
         ITokenService tokenService)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
+        _userRepository = userRepository;
         _tokenService = tokenService;
-    }
-
-    public async Task<AuthResultDto> RegisterUserAsync(DomainUser domainUser, string password)
-    {
-        var user = new User
-        {
-            UserName = domainUser.Email,
-            Email = domainUser.Email,
-            FirstName = domainUser.FirstName,
-            LastName = domainUser.LastName
-        };
-
-        var result = await _userManager.CreateAsync(user, password);
-
-        if (!result.Succeeded)
-        {
-            return new AuthResultDto
-            {
-                Succeeded = false,
-                Errors = result.Errors.Select(e => e.Description)
-            };
-        }
-
-        return new AuthResultDto
-        {
-            Succeeded = true,
-            Token = _tokenService.GenerateJwtToken(user.Id, user.Email)
-        };
     }
 
     public async Task<AuthResultDto> AuthenticateAsync(string email, string password)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userRepository.FindByEmailAsync(email);
         if (user == null)
         {
-            return new AuthResultDto
-            {
-                Succeeded = false,
-                Errors = new[] { "Invalid credentials" }
-            };
+            return AuthResultDto.Failure("Invalid credentials");
         }
 
-        var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
-        if (!result.Succeeded)
+        var isValid = await _userRepository.CheckPasswordAsync(user, password);
+        if (!isValid)
         {
-            return new AuthResultDto
-            {
-                Succeeded = false,
-                Errors = new[] { "Invalid credentials" }
-            };
+            return AuthResultDto.Failure("Invalid credentials");
         }
 
-        return new AuthResultDto
+        var token = _tokenService.GenerateJwtToken(user.Id, email);
+        return AuthResultDto.Success(token);
+    }
+
+    public async Task<AuthResultDto> RegisterUserAsync(DomainUser user, string password)
+    {
+        var (succeeded, errors) = await _userRepository.CreateAsync(
+            user.Email,
+            password,
+            user.FirstName,
+            user.LastName
+        );
+        if (!succeeded)
         {
-            Succeeded = true,
-            Token = _tokenService.GenerateJwtToken(user.Id, email)
-        };
+            return AuthResultDto.Failure(errors.FirstOrDefault() ?? "Registration failed");
+        }
+
+        var token = _tokenService.GenerateJwtToken(user.Id, user.Email);
+        return AuthResultDto.Success(token);
     }
 }

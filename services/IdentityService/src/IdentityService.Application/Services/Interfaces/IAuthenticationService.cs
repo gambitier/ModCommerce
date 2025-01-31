@@ -1,5 +1,5 @@
-using IdentityService.Domain.Entities;
 using IdentityService.Application.Models;
+using IdentityService.Domain.DomainModels;
 
 namespace IdentityService.Application.Services.Interfaces;
 

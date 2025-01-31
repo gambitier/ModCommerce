@@ -13,8 +13,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration.GetJwtOptions());
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityInfrastructure(builder.Configuration.GetDatabaseOptions());
 
-// Register Application Services
 builder.Services.AddApplicationServices(ServiceLifetime.Scoped);
+builder.Services.AddInfrastructureServices(ServiceLifetime.Scoped);
 
 var app = builder.Build();
 

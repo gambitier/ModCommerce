@@ -8,19 +8,50 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         ServiceLifetime lifetime = ServiceLifetime.Scoped)
     {
-        var assembly = Assembly.GetAssembly(typeof(Application.Services.Interfaces.IAuthenticationService))
+        var applicationAssembly = Assembly.Load("IdentityService.Application")
             ?? throw new InvalidOperationException("Could not find Application assembly");
 
-        var interfaces = assembly.GetTypes()
+        var interfaces = applicationAssembly.GetTypes()
             .Where(t => t.IsInterface && t.Namespace?.StartsWith("IdentityService.Application.Services.Interfaces") == true)
             .ToList();
 
         foreach (var interfaceType in interfaces)
         {
-            var implementation = assembly.GetTypes()
+            var implementation = applicationAssembly.GetTypes()
                 .FirstOrDefault(t => t.IsClass
                     && !t.IsAbstract
                     && t.Namespace?.StartsWith("IdentityService.Application.Services.Implementations") == true
+                    && interfaceType.IsAssignableFrom(t));
+
+            if (implementation != null)
+            {
+                services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
+            }
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddInfrastructureServices(
+        this IServiceCollection services,
+        ServiceLifetime lifetime = ServiceLifetime.Scoped)
+    {
+        var domainAssembly = Assembly.Load("IdentityService.Domain")
+            ?? throw new InvalidOperationException("Could not find Domain assembly");
+
+        var infrastructureAssembly = Assembly.Load("IdentityService.Infrastructure")
+            ?? throw new InvalidOperationException("Could not find Infrastructure assembly");
+
+        var interfaces = domainAssembly.GetTypes()
+            .Where(t => t.IsInterface && t.Namespace?.StartsWith("IdentityService.Domain.Interfaces.Repositories") == true)
+            .ToList();
+
+        foreach (var interfaceType in interfaces)
+        {
+            var implementation = infrastructureAssembly.GetTypes()
+                .FirstOrDefault(t => t.IsClass
+                    && !t.IsAbstract
+                    && t.Namespace?.StartsWith("IdentityService.Infrastructure.Repositories") == true
                     && interfaceType.IsAssignableFrom(t));
 
             if (implementation != null)

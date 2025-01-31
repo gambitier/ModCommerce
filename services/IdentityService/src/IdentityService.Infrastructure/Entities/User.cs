@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using IdentityService.Domain.Entities;
 
 namespace IdentityService.Infrastructure.Entities;
 
-public class User : IdentityUser
+public class User : IdentityUser, IApplicationUser
 {
     [Column(TypeName = "varchar(100)")]
     [StringLength(100)]
