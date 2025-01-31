@@ -1,7 +1,6 @@
 using IdentityService.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using IdentityService.API.Contracts.Auth;
-using IdentityService.Domain.DomainModels;
 
 namespace IdentityService.API.Controllers;
 
@@ -19,7 +18,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var result = await _authService.RegisterUserAsync(new DomainUser
+        var result = await _authService.RegisterUserAsync(new UserDto
         {
             Email = request.Email,
             FirstName = request.FirstName,

@@ -32,7 +32,7 @@ public class UserRepository : IUserRepository
         return result.Succeeded;
     }
 
-    public async Task<(bool Succeeded, string[] Errors)> CreateAsync(string email, string password, string? firstName = null, string? lastName = null)
+    public async Task<(bool Succeeded, string[] Errors, string? UserId)> CreateAsync(string email, string password, string? firstName = null, string? lastName = null)
     {
         var user = new User
         {
@@ -43,6 +43,6 @@ public class UserRepository : IUserRepository
         };
 
         var result = await _userManager.CreateAsync(user, password);
-        return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray());
+        return (result.Succeeded, result.Errors.Select(e => e.Description).ToArray(), result.Succeeded ? user.Id : null);
     }
 }

@@ -1,6 +1,5 @@
 using IdentityService.Application.Models;
 using IdentityService.Application.Services.Interfaces;
-using IdentityService.Domain.DomainModels;
 using IdentityService.Domain.Interfaces.Repositories;
 
 namespace IdentityService.Application.Services.Implementations;
@@ -36,20 +35,20 @@ public class AuthenticationService : IAuthenticationService
         return AuthResultDto.Success(token);
     }
 
-    public async Task<AuthResultDto> RegisterUserAsync(DomainUser user, string password)
+    public async Task<AuthResultDto> RegisterUserAsync(UserDto user, string password)
     {
-        var (succeeded, errors) = await _userRepository.CreateAsync(
+        var (succeeded, errors, userId) = await _userRepository.CreateAsync(
             user.Email,
             password,
             user.FirstName,
             user.LastName
         );
-        if (!succeeded)
+        if (!succeeded || userId == null)
         {
             return AuthResultDto.Failure(errors.FirstOrDefault() ?? "Registration failed");
         }
 
-        var token = _tokenService.GenerateJwtToken(user.Id, user.Email);
+        var token = _tokenService.GenerateJwtToken(userId, user.Email);
         return AuthResultDto.Success(token);
     }
 }
