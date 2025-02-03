@@ -1,9 +1,9 @@
 using IdentityService.Domain.Entities;
 using IdentityService.Domain.Interfaces.Repositories;
-using IdentityService.Infrastructure.Entities;
+using IdentityService.Infrastructure.Persistence.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace IdentityService.Infrastructure.Repositories;
+namespace IdentityService.Infrastructure.Persistence.Repositories;
 
 public class UserRepository : IUserRepository
 {

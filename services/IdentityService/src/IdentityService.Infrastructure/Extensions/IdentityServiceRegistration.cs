@@ -1,6 +1,6 @@
-using IdentityService.Infrastructure.Data;
-using IdentityService.Infrastructure.Entities;
-using IdentityService.Infrastructure.Options;
+using IdentityService.Infrastructure.Persistence.Data;
+using IdentityService.Infrastructure.Persistence.Entities;
+using IdentityService.Infrastructure.Persistence.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

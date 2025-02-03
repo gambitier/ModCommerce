@@ -1,5 +1,5 @@
 using IdentityService.Application.Options;
-using IdentityService.Infrastructure.Options;
+using IdentityService.Infrastructure.Persistence.Options;
 using IdentityService.API.Constants;
 namespace IdentityService.API.Extensions;
 

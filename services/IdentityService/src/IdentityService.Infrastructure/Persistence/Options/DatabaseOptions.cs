@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace IdentityService.Infrastructure.Options;
+namespace IdentityService.Infrastructure.Persistence.Options;
 
 public class DatabaseOptions
 {

@@ -31,7 +31,7 @@ public static class RepositoryRegistration
             var implementation = infrastructureAssembly.GetTypes()
                 .FirstOrDefault(t => t.IsClass
                     && !t.IsAbstract
-                    && t.Namespace?.StartsWith("IdentityService.Infrastructure.Repositories") == true
+                    && t.Namespace?.StartsWith("IdentityService.Infrastructure.Persistence.Repositories") == true
                     && interfaceType.IsAssignableFrom(t));
 
             if (implementation != null)

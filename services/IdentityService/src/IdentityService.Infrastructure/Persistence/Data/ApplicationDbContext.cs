@@ -1,8 +1,8 @@
-using IdentityService.Infrastructure.Entities;
+using IdentityService.Infrastructure.Persistence.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityService.Infrastructure.Data;
+namespace IdentityService.Infrastructure.Persistence.Data;
 
 /// <summary>
 /// ApplicationDbContext is the main DbContext for the IdentityService.

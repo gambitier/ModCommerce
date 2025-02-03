@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace IdentityService.Infrastructure.Migrations
+namespace IdentityService.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class MakeNamesOptional : Migration

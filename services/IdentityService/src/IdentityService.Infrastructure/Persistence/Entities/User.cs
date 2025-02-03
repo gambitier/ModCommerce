@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using IdentityService.Domain.Entities;
 
-namespace IdentityService.Infrastructure.Entities;
+namespace IdentityService.Infrastructure.Persistence.Entities;
 
 public class User : IdentityUser, IApplicationUser
 {
