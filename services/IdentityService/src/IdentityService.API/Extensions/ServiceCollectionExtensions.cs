@@ -31,35 +31,4 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    public static IServiceCollection AddInfrastructureServices(
-        this IServiceCollection services,
-        ServiceLifetime lifetime = ServiceLifetime.Scoped)
-    {
-        var domainAssembly = Assembly.Load("IdentityService.Domain")
-            ?? throw new InvalidOperationException("Could not find Domain assembly");
-
-        var infrastructureAssembly = Assembly.Load("IdentityService.Infrastructure")
-            ?? throw new InvalidOperationException("Could not find Infrastructure assembly");
-
-        var interfaces = domainAssembly.GetTypes()
-            .Where(t => t.IsInterface && t.Namespace?.StartsWith("IdentityService.Domain.Interfaces.Repositories") == true)
-            .ToList();
-
-        foreach (var interfaceType in interfaces)
-        {
-            var implementation = infrastructureAssembly.GetTypes()
-                .FirstOrDefault(t => t.IsClass
-                    && !t.IsAbstract
-                    && t.Namespace?.StartsWith("IdentityService.Infrastructure.Repositories") == true
-                    && interfaceType.IsAssignableFrom(t));
-
-            if (implementation != null)
-            {
-                services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
-            }
-        }
-
-        return services;
-    }
 }

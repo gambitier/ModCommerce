@@ -14,7 +14,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityInfrastructure(builder.Configuration.GetDatabaseOptions());
 
 builder.Services.AddApplicationServices(ServiceLifetime.Scoped);
-builder.Services.AddInfrastructureServices(ServiceLifetime.Scoped);
+builder.Services.AddRepositories(ServiceLifetime.Scoped);
 
 var app = builder.Build();
 
