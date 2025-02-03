@@ -1,6 +1,7 @@
-using IdentityService.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using IdentityService.API.Contracts.Auth;
+using IdentityService.Application.Interfaces.Services;
+using IdentityService.Application.Models;
 
 namespace IdentityService.API.Controllers;
 

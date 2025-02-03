@@ -1,8 +1,8 @@
-using IdentityService.Application.Models;
-using IdentityService.Application.Services.Interfaces;
 using IdentityService.Domain.Interfaces.Repositories;
+using IdentityService.Application.Interfaces.Services;
+using IdentityService.Application.Models;
 
-namespace IdentityService.Application.Services.Implementations;
+namespace IdentityService.Application.Services;
 
 public class AuthenticationService : IAuthenticationService
 {

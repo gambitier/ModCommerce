@@ -1,4 +1,5 @@
 using IdentityService.Infrastructure.Extensions;
+using IdentityService.Application.Extensions;
 using IdentityService.API.Extensions;
 using Scalar.AspNetCore;
 
@@ -9,12 +10,13 @@ builder.Services.AddOptions(builder.Configuration);
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+
 builder.Services.AddJwtAuthentication(builder.Configuration.GetJwtOptions());
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityInfrastructure(builder.Configuration.GetDatabaseOptions());
 
-builder.Services.AddApplicationServices(ServiceLifetime.Scoped);
 builder.Services.AddRepositories(ServiceLifetime.Scoped);
+builder.Services.AddApplicationServices(ServiceLifetime.Scoped);
 
 var app = builder.Build();
 

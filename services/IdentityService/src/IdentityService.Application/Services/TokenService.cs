@@ -4,9 +4,9 @@ using System.Text;
 using IdentityService.Application.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
-using IdentityService.Application.Services.Interfaces;
+using IdentityService.Application.Interfaces.Services;
 
-namespace IdentityService.Application.Services.Implementations;
+namespace IdentityService.Application.Services;
 
 public class TokenService : ITokenService
 {
