@@ -13,10 +13,15 @@ builder.Services.AddControllers();
 
 builder.Services.AddJwtAuthentication(builder.Configuration.GetJwtOptions());
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityInfrastructure(builder.Configuration.GetDatabaseOptions());
-
-builder.Services.AddRepositories(ServiceLifetime.Scoped);
-builder.Services.AddApplicationServices(ServiceLifetime.Scoped);
+builder.Services.AddInfrastructure(options =>
+{
+    options.DatabaseOptions = builder.Configuration.GetDatabaseOptions();
+    options.RepositoryLifetime = ServiceLifetime.Scoped;
+});
+builder.Services.AddApplication(options =>
+{
+    options.ServiceLifetime = ServiceLifetime.Scoped;
+});
 
 var app = builder.Build();
 

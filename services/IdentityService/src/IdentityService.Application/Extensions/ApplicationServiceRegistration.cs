@@ -1,10 +1,48 @@
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityService.Application.Extensions;
 
-public static class ApplicationServiceRegistration
+/// <summary>
+/// Extension methods of <see cref="IServiceCollection"/> for the Application.
+/// </summary>
+public static class ApplicationServiceCollectionExtensions
 {
+    /// <summary>
+    /// Options for the application layer services.
+    /// </summary>
+    public class ApplicationOptions
+    {
+        public ServiceLifetime ServiceLifetime { get; set; } = ServiceLifetime.Scoped;
+    }
+
+    /// <summary>
+    /// Registers the application layer services.
+    /// This method is a convenience method that registers all application services.
+    /// </summary>
+    /// <param name="services">The service collection to add the application services to.</param>
+    /// <param name="lifetime">The lifetime of the services.</param>
+    /// <returns>The service collection with the application services added.</returns>
+    public static IServiceCollection AddApplication(
+        this IServiceCollection services,
+        Action<ApplicationOptions> configureOptions)
+    {
+        var options = new ApplicationOptions();
+        configureOptions(options);
+
+        // validate options
+        Validator.ValidateObject(options, new ValidationContext(options), validateAllProperties: true);
+
+        services.AddApplicationServices(options.ServiceLifetime);
+        // Add any additional application layer registrations here
+        // For example:
+        // services.AddAutoMapper(...);
+        // services.AddValidators(...);
+
+        return services;
+    }
+
     /// <summary>
     /// Registers all application services in the IdentityService.Application assembly.
     /// </summary>
