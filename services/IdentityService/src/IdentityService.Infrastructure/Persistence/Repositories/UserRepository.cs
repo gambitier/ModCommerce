@@ -32,14 +32,12 @@ public class UserRepository : IUserRepository
         return result.Succeeded;
     }
 
-    public async Task<(bool Succeeded, string[] Errors, string? UserId)> CreateAsync(string email, string password, string? firstName = null, string? lastName = null)
+    public async Task<(bool Succeeded, string[] Errors, string? UserId)> CreateAsync(string email, string password)
     {
         var user = new User
         {
             UserName = email,
             Email = email,
-            FirstName = firstName,
-            LastName = lastName
         };
 
         var result = await _userManager.CreateAsync(user, password);

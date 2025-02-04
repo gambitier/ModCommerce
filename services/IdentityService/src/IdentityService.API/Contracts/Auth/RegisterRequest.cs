@@ -4,12 +4,6 @@ namespace IdentityService.API.Contracts.Auth;
 
 public class RegisterRequest
 {
-    [StringLength(50)]
-    public string? FirstName { get; set; }
-
-    [StringLength(50)]
-    public string? LastName { get; set; }
-
     [Required]
     [EmailAddress]
     [StringLength(100)]

@@ -39,9 +39,7 @@ public class AuthenticationService : IAuthenticationService
     {
         var (succeeded, errors, userId) = await _userRepository.CreateAsync(
             user.Email,
-            password,
-            user.FirstName,
-            user.LastName
+            password
         );
         if (!succeeded || userId == null)
         {

@@ -28,7 +28,7 @@ add-migration:
 		exit 1; \
 	fi
 	@echo "${INFO} Creating new migration: $(name)"
-	dotnet ef migrations add $(name) --project $(INFRASTRUCTURE_PROJECT) --startup-project $(STARTUP_PROJECT)
+	dotnet ef migrations add $(name) --project $(INFRASTRUCTURE_PROJECT) --startup-project $(STARTUP_PROJECT) --output-dir Persistence/Migrations
 
 # Remove last migration
 remove-migration:

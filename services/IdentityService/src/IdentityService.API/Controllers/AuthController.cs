@@ -22,8 +22,6 @@ public class AuthController : ControllerBase
         var result = await _authService.RegisterUserAsync(new UserDto
         {
             Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
         }, request.Password);
 
         if (!result.Succeeded)
