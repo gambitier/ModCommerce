@@ -11,12 +11,13 @@ builder.Services.AddOptions(builder.Configuration);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-builder.Services.AddJwtAuthentication(builder.Configuration.GetJwtOptions());
 builder.Services.AddAuthorization();
 builder.Services.AddInfrastructure(options =>
 {
     options.DatabaseOptions = builder.Configuration.GetDatabaseOptions();
     options.RepositoryLifetime = ServiceLifetime.Scoped;
+    options.AuthenticationServicesLifetime = ServiceLifetime.Scoped;
+    options.JwtOptions = builder.Configuration.GetJwtOptions();
 });
 builder.Services.AddApplication(options =>
 {

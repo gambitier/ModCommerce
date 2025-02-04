@@ -1,6 +1,7 @@
 using IdentityService.Domain.Interfaces.Repositories;
 using IdentityService.Application.Interfaces.Services;
 using IdentityService.Application.Models;
+using IdentityService.Domain.Interfaces.AuthenticationServices;
 
 namespace IdentityService.Application.Services;
 

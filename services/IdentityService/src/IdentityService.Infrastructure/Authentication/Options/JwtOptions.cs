@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace IdentityService.Application.Options;
+namespace IdentityService.Infrastructure.Authentication.Options;
 
 public class JwtOptions
 {

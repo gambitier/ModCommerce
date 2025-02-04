@@ -9,6 +9,9 @@ namespace IdentityService.Application.Extensions;
 /// </summary>
 public static class ApplicationServiceCollectionExtensions
 {
+    private const string ApplicationServicesNamespace = "IdentityService.Application.Services";
+    private const string ApplicationServicesInterfacesNamespace = "IdentityService.Application.Interfaces.Services";
+
     /// <summary>
     /// Options for the application layer services.
     /// </summary>
@@ -58,7 +61,7 @@ public static class ApplicationServiceCollectionExtensions
             ?? throw new InvalidOperationException("Could not find Application assembly");
 
         var serviceInterfaces = applicationAssembly.GetTypes()
-            .Where(t => t.IsInterface && t.Namespace?.StartsWith("IdentityService.Application.Interfaces.Services") == true)
+            .Where(t => t.IsInterface && t.Namespace?.StartsWith(ApplicationServicesInterfacesNamespace) == true)
             .ToList();
 
         foreach (var interfaceType in serviceInterfaces)
@@ -66,9 +69,9 @@ public static class ApplicationServiceCollectionExtensions
             var implementation = applicationAssembly.GetTypes()
                 .FirstOrDefault(t => t.IsClass
                     && !t.IsAbstract
-                    && t.Namespace?.StartsWith("IdentityService.Application.Services") == true
+                    && t.Namespace?.StartsWith(ApplicationServicesNamespace) == true
                     && interfaceType.IsAssignableFrom(t))
-                ?? throw new InvalidOperationException($"No implementation found for {interfaceType.Name}");
+                ?? throw new InvalidOperationException($"No implementation found for {interfaceType.Name} in namespace {ApplicationServicesNamespace}");
 
             services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
         }

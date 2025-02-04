@@ -1,6 +1,7 @@
-using IdentityService.Application.Options;
 using IdentityService.Infrastructure.Persistence.Options;
 using IdentityService.API.Constants;
+using IdentityService.Infrastructure.Authentication.Options;
+
 namespace IdentityService.API.Extensions;
 
 /// <summary>

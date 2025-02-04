@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using IdentityService.Infrastructure.Authentication.Options;
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -14,6 +18,9 @@ namespace IdentityService.Infrastructure.Extensions;
 /// </summary>
 public static class InfrastructureServiceCollectionExtensions
 {
+    private const string AuthenticationServicesNamespace = "IdentityService.Infrastructure.Authentication.Services";
+    private const string RepositoriesNamespace = "IdentityService.Infrastructure.Persistence.Repositories";
+
     public class InfrastructureOptions
     {
         /// <summary>
@@ -23,7 +30,12 @@ public static class InfrastructureServiceCollectionExtensions
         /// </summary>
         [Required(ErrorMessage = "DatabaseOptions must be configured when calling AddInfrastructure")]
         public DatabaseOptions DatabaseOptions { get; set; } = null!;
+
+        [Required(ErrorMessage = "JwtOptions must be configured when calling AddInfrastructure")]
+        public JwtOptions JwtOptions { get; set; } = null!;
+
         public ServiceLifetime RepositoryLifetime { get; set; } = ServiceLifetime.Scoped;
+        public ServiceLifetime AuthenticationServicesLifetime { get; set; } = ServiceLifetime.Scoped;
     }
 
     /// <summary>
@@ -46,6 +58,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddDbContext(options.DatabaseOptions);
         services.AddIdentity();
         services.AddRepositories(options.RepositoryLifetime);
+        services.AddAuthenticationServices(options.AuthenticationServicesLifetime);
+        services.AddJwtAuthentication(options.JwtOptions);
 
         return services;
     }
@@ -83,6 +97,68 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers the JWT authentication services.
+    /// </summary>
+    /// <param name="services">The service collection to add the JWT authentication services to.</param>
+    /// <param name="jwtOptions">The JWT options.</param>
+    /// <returns>The service collection with the JWT authentication services added.</returns>
+    public static void AddJwtAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
+    {
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.Secret)
+                    ),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+    }
+
+    /// <summary>
+    /// Registers the Authentication services.
+    /// </summary>
+    /// <param name="services">The service collection to add the Authentication services to.</param>
+    /// <param name="lifetime">The lifetime of the Authentication services.</param>
+    /// <returns>The service collection with the Authentication services added.</returns>
+    public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, ServiceLifetime lifetime)
+    {
+        var domainAssembly = Assembly.Load("IdentityService.Domain")
+            ?? throw new InvalidOperationException("Could not find Domain assembly");
+
+        var infrastructureAssembly = Assembly.Load("IdentityService.Infrastructure")
+            ?? throw new InvalidOperationException("Could not find Infrastructure assembly");
+
+        var interfaces = domainAssembly.GetTypes()
+            .Where(t => t.IsInterface && t.Namespace?.StartsWith("IdentityService.Domain.Interfaces.AuthenticationServices") == true)
+            .ToList();
+
+        foreach (var interfaceType in interfaces)
+        {
+            var implementation = infrastructureAssembly.GetTypes()
+                .FirstOrDefault(t => t.IsClass
+                    && !t.IsAbstract
+                    && t.Namespace?.StartsWith(AuthenticationServicesNamespace) == true
+                    && interfaceType.IsAssignableFrom(t))
+                ?? throw new InvalidOperationException($"No implementation found for {interfaceType.Name} in namespace {AuthenticationServicesNamespace}");
+
+            services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
+        }
+
+        return services;
+    }
+
+
+    /// <summary>
     /// Registers all repositories in the IdentityService.Domain and IdentityService.Infrastructure assemblies.
     /// </summary>
     /// <param name="services">The service collection to add the repositories to.</param>
@@ -108,9 +184,9 @@ public static class InfrastructureServiceCollectionExtensions
             var implementation = infrastructureAssembly.GetTypes()
                 .FirstOrDefault(t => t.IsClass
                     && !t.IsAbstract
-                    && t.Namespace?.StartsWith("IdentityService.Infrastructure.Persistence.Repositories") == true
+                    && t.Namespace?.StartsWith(RepositoriesNamespace) == true
                     && interfaceType.IsAssignableFrom(t))
-                ?? throw new InvalidOperationException($"No implementation found for {interfaceType.Name}");
+                ?? throw new InvalidOperationException($"No implementation found for {interfaceType.Name} in namespace {RepositoriesNamespace}");
 
             services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
         }
