@@ -67,12 +67,10 @@ public static class ApplicationServiceCollectionExtensions
                 .FirstOrDefault(t => t.IsClass
                     && !t.IsAbstract
                     && t.Namespace?.StartsWith("IdentityService.Application.Services") == true
-                    && interfaceType.IsAssignableFrom(t));
+                    && interfaceType.IsAssignableFrom(t))
+                ?? throw new InvalidOperationException($"No implementation found for {interfaceType.Name}");
 
-            if (implementation != null)
-            {
-                services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
-            }
+            services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
         }
 
         return services;
