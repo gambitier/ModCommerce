@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using IdentityService.API.Contracts.Auth;
 using IdentityService.Application.Interfaces.Services;
 using IdentityService.Application.Models;
+using FluentResults.Extensions.AspNetCore;
 
 namespace IdentityService.API.Controllers;
 
@@ -17,28 +18,20 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult<AuthResultDto>> Register([FromBody] RegisterRequest request)
     {
-        var result = await _authService.RegisterUserAsync(new UserDto
-        {
-            Email = request.Email,
-        }, request.Password);
-
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-
-        return Ok(new { message = "User registered successfully!" });
+        var result = await _authService.RegisterUserAsync(
+            new UserDto { Email = request.Email },
+            request.Password
+        );
+        return result.ToActionResult();
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<AuthResultDto>> Login([FromBody] LoginRequest request)
     {
         var result = await _authService.AuthenticateAsync(request.Email, request.Password);
-
-        if (!result.Succeeded)
-            return Unauthorized("Invalid credentials");
-
-        return Ok(new { access_token = result.Token });
+        return result.ToActionResult();
     }
 }
 

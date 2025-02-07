@@ -2,6 +2,7 @@ using IdentityService.Domain.Interfaces.Repositories;
 using IdentityService.Application.Interfaces.Services;
 using IdentityService.Application.Models;
 using IdentityService.Domain.Interfaces.AuthenticationServices;
+using FluentResults;
 
 namespace IdentityService.Application.Services;
 
@@ -18,36 +19,28 @@ public class AuthenticationService : IAuthenticationService
         _tokenService = tokenService;
     }
 
-    public async Task<AuthResultDto> AuthenticateAsync(string email, string password)
+    public async Task<Result<AuthResultDto>> AuthenticateAsync(string email, string password)
     {
-        var user = await _userRepository.FindByEmailAsync(email);
-        if (user == null)
-        {
-            return AuthResultDto.Failure("Invalid credentials");
-        }
+        var userResult = await _userRepository.FindByEmailAsync(email);
+        if (userResult.IsFailed)
+            return userResult.ToResult<AuthResultDto>();
 
-        var isValid = await _userRepository.CheckPasswordAsync(user, password);
-        if (!isValid)
-        {
-            return AuthResultDto.Failure("Invalid credentials");
-        }
+        var passwordResult = await _userRepository.CheckPasswordAsync(userResult.Value.Id, password);
+        if (passwordResult.IsFailed)
+            return passwordResult.ToResult<AuthResultDto>();
 
-        var token = _tokenService.GenerateJwtToken(user.Id, email);
-        return AuthResultDto.Success(token);
+        var token = _tokenService.GenerateJwtToken(userResult.Value.Id, email);
+        return Result.Ok(new AuthResultDto(token));
     }
 
-    public async Task<AuthResultDto> RegisterUserAsync(UserDto user, string password)
+    public async Task<Result<AuthResultDto>> RegisterUserAsync(UserDto user, string password)
     {
-        var (succeeded, errors, userId) = await _userRepository.CreateAsync(
-            user.Email,
-            password
-        );
-        if (!succeeded || userId == null)
-        {
-            return AuthResultDto.Failure(errors.FirstOrDefault() ?? "Registration failed");
-        }
+        var result = await _userRepository.CreateAsync(user.Email, password);
+        if (result.IsFailed)
+            return result.ToResult<AuthResultDto>();
 
-        var token = _tokenService.GenerateJwtToken(userId, user.Email);
-        return AuthResultDto.Success(token);
+        var (userId, email) = result.Value;
+        var token = _tokenService.GenerateJwtToken(userId, email);
+        return Result.Ok(new AuthResultDto(token));
     }
 }
