@@ -4,6 +4,7 @@ using IdentityService.API.Extensions;
 using Scalar.AspNetCore;
 using IdentityService.API.Middleware;
 using FluentResults.Extensions.AspNetCore;
+using IdentityService.API.ErrorHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 //add and validate options at startup
