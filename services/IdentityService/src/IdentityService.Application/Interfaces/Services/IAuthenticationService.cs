@@ -1,9 +1,9 @@
 using IdentityService.Application.Models;
-
+using FluentResults;
 namespace IdentityService.Application.Interfaces.Services;
 
 public interface IAuthenticationService
 {
-    Task<AuthResultDto> RegisterUserAsync(UserDto user, string password);
-    Task<AuthResultDto> AuthenticateAsync(string email, string password);
+    Task<Result<AuthResultDto>> RegisterUserAsync(UserDto user, string password);
+    Task<Result<AuthResultDto>> AuthenticateAsync(string email, string password);
 }

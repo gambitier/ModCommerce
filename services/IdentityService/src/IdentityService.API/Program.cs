@@ -2,6 +2,9 @@ using IdentityService.Infrastructure.Extensions;
 using IdentityService.Application.Extensions;
 using IdentityService.API.Extensions;
 using Scalar.AspNetCore;
+using IdentityService.API.Middleware;
+using FluentResults.Extensions.AspNetCore;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 //add and validate options at startup
@@ -24,7 +27,18 @@ builder.Services.AddApplication(options =>
     options.ServiceLifetime = ServiceLifetime.Scoped;
 });
 
+
+builder.Services.AddHttpContextAccessor();
+
+// Register services for custom error handling
+builder.Services.AddProblemDetails();
+builder.Services.AddSingleton<CustomAspNetCoreResultEndpointProfile>();
+
 var app = builder.Build();
+
+AspNetCoreResult.Setup(config =>
+    config.DefaultProfile = app.Services.GetRequiredService<CustomAspNetCoreResultEndpointProfile>()
+);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,6 +51,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
