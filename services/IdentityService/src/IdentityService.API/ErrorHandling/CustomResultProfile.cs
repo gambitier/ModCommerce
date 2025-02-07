@@ -4,6 +4,11 @@ using IdentityService.Domain.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
+/// <summary>
+/// Custom result profile for the IdentityService.API that transforms FluentResults errors into standard HTTP responses.
+/// Without this profile, the API would not properly translate FluentResults errors into RFC 7807 problem details format
+/// that clients expect from REST APIs.
+/// </summary>
 public class CustomAspNetCoreResultEndpointProfile : DefaultAspNetCoreResultEndpointProfile
 {
     /// <summary>
