@@ -25,7 +25,7 @@ public static class ApplicationServiceCollectionExtensions
     /// This method is a convenience method that registers all application services.
     /// </summary>
     /// <param name="services">The service collection to add the application services to.</param>
-    /// <param name="lifetime">The lifetime of the services.</param>
+    /// <param name="configureOptions">The configuration options for the application services.</param>
     /// <returns>The service collection with the application services added.</returns>
     public static IServiceCollection AddApplication(
         this IServiceCollection services,
@@ -53,7 +53,7 @@ public static class ApplicationServiceCollectionExtensions
     /// <param name="lifetime">The lifetime of the services.</param>
     /// <returns>The service collection with the services added.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the Application assembly is not found.</exception>
-    public static IServiceCollection AddApplicationServices(
+    private static IServiceCollection AddApplicationServices(
         this IServiceCollection services,
         ServiceLifetime lifetime = ServiceLifetime.Scoped)
     {
