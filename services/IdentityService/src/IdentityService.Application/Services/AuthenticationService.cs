@@ -33,14 +33,13 @@ public class AuthenticationService : IAuthenticationService
         return Result.Ok(new AuthResultDto(token));
     }
 
-    public async Task<Result<AuthResultDto>> RegisterUserAsync(UserDto user, string password)
+    public async Task<Result<AuthResultDto>> RegisterUserAsync(CreateUserDto user, string password)
     {
         var result = await _userRepository.CreateAsync(user.Email, password);
         if (result.IsFailed)
             return result.ToResult<AuthResultDto>();
 
-        var (userId, email) = result.Value;
-        var token = _tokenService.GenerateJwtToken(userId, email);
+        var token = _tokenService.GenerateJwtToken(result.Value.Id, result.Value.Email);
         return Result.Ok(new AuthResultDto(token));
     }
 }

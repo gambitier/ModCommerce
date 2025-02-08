@@ -1,9 +1,14 @@
-using Microsoft.AspNetCore.Identity;
-using IdentityService.Domain.Entities;
-
 namespace IdentityService.Infrastructure.Persistence.Entities;
 
-public class User : IdentityUser, IApplicationUser
+public class IdentityUser : Microsoft.AspNetCore.Identity.IdentityUser
 {
     // Empty - using only IdentityUser base functionality
+    public static IdentityUser Create(string email)
+    {
+        return new IdentityUser
+        {
+            UserName = email,
+            Email = email,
+        };
+    }
 }

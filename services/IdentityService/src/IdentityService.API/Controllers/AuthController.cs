@@ -18,20 +18,36 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResultDto>> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
         var result = await _authService.RegisterUserAsync(
-            new UserDto { Email = request.Email },
+            new CreateUserDto { Email = request.Email },
             request.Password
         );
-        return result.ToActionResult();
+        if (result.IsFailed || result.Value.Token == null)
+            return result.ToActionResult();
+
+        var authResponse = new AuthResponse
+        {
+            Token = result.Value.Token,
+        };
+
+        return Ok(authResponse);
+
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResultDto>> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
     {
         var result = await _authService.AuthenticateAsync(request.Email, request.Password);
-        return result.ToActionResult();
+        if (result.IsFailed || result.Value.Token == null)
+            return result.ToActionResult();
+
+        var authResponse = new AuthResponse
+        {
+            Token = result.Value.Token,
+        };
+
+        return Ok(authResponse);
     }
 }
-
