@@ -28,9 +28,11 @@ public class UserRepository : IUserRepository
         {
             var errors = result.Errors.Select<IdentityError, IError>(e => e.Code switch
             {
-                "DuplicateEmail" => DomainErrors.Authentication.EmailAlreadyExists,
-                "InvalidEmail" => DomainErrors.User.InvalidEmail,
-                "PasswordTooShort" or "PasswordRequiresDigit" or "PasswordRequiresNonAlphanumeric"
+                nameof(IdentityErrorDescriber.DuplicateEmail) => DomainErrors.Authentication.EmailAlreadyExists,
+                nameof(IdentityErrorDescriber.InvalidEmail) => DomainErrors.User.InvalidEmail,
+                nameof(IdentityErrorDescriber.PasswordTooShort) or
+                nameof(IdentityErrorDescriber.PasswordRequiresDigit) or
+                nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric)
                     => DomainErrors.User.WeakPassword,
                 _ => DomainErrors.User.CreationFailed(e.Description)
             });
