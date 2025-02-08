@@ -1,10 +1,11 @@
-using IdentityService.Domain.Entities;
 using FluentResults;
+using IdentityService.Domain.Models;
+
 namespace IdentityService.Domain.Interfaces.Repositories;
 
 public interface IUserRepository
 {
-    Task<Result<(string UserId, string Email)>> CreateAsync(string email, string password);
+    Task<Result<UserDomainModel>> CreateAsync(string email, string password);
     Task<Result<bool>> CheckPasswordAsync(string userId, string password);
-    Task<Result<IApplicationUser>> FindByEmailAsync(string email);
+    Task<Result<UserDomainModel>> FindByEmailAsync(string email);
 }

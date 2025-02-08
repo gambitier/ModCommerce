@@ -1,5 +1,4 @@
 using IdentityService.Infrastructure.Persistence.Data;
-using IdentityService.Infrastructure.Persistence.Entities;
 using IdentityService.Infrastructure.Persistence.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -89,7 +88,7 @@ public static class InfrastructureServiceCollectionExtensions
         // Without AddIdentity()
         // - you would have the database tables (as ApplicationDbContext inherits from IdentityDbContext)
         // - you wont be able to inject the UserManager, SignInManager, etc to services/controllers
-        services.AddIdentity<User, IdentityRole>()
+        services.AddIdentity<Persistence.Entities.IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
