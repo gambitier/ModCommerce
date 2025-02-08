@@ -49,6 +49,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseRouting();
+
+// These two must be in this order, after UseRouting and before MapControllers
 app.UseAuthentication();
 app.UseAuthorization();
 
