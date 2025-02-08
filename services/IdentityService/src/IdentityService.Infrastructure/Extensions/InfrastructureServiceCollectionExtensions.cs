@@ -70,7 +70,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <param name="services">The service collection to add the DbContext to.</param>
     /// <param name="databaseOptions">The database options.</param>
     /// <returns>The service collection with the DbContext added.</returns>
-    public static IServiceCollection AddDbContext(this IServiceCollection services, DatabaseOptions databaseOptions)
+    private static IServiceCollection AddDbContext(this IServiceCollection services, DatabaseOptions databaseOptions)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(databaseOptions.ConnectionString));
@@ -83,7 +83,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection to add the Identity services to.</param>
     /// <returns>The service collection with the Identity services added.</returns>
-    public static IServiceCollection AddIdentity(this IServiceCollection services)
+    private static IServiceCollection AddIdentity(this IServiceCollection services)
     {
         // AddIdentity() registers the services needed to manage users, handle authentication, etc
         // Without AddIdentity()
@@ -109,7 +109,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <param name="services">The service collection to add the JWT authentication services to.</param>
     /// <param name="jwtOptions">The JWT options.</param>
     /// <returns>The service collection with the JWT authentication services added.</returns>
-    public static void AddJwtAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
+    private static void AddJwtAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
     {
         services
             .AddAuthentication(options =>
@@ -141,7 +141,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection to add the Authorization services to.</param>
     /// <returns>The service collection with the Authorization services added.</returns>
-    public static IServiceCollection AddAuthorizationServices(this IServiceCollection services)
+    private static IServiceCollection AddAuthorizationServices(this IServiceCollection services)
     {
         services.AddAuthorization();
         return services;
@@ -153,7 +153,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <param name="services">The service collection to add the Authentication services to.</param>
     /// <param name="lifetime">The lifetime of the Authentication services.</param>
     /// <returns>The service collection with the Authentication services added.</returns>
-    public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, ServiceLifetime lifetime)
+    private static IServiceCollection AddAuthenticationServices(this IServiceCollection services, ServiceLifetime lifetime)
     {
         var domainAssembly = Assembly.Load("IdentityService.Domain")
             ?? throw new InvalidOperationException("Could not find Domain assembly");
@@ -188,7 +188,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <param name="lifetime">The lifetime of the repositories.</param>
     /// <returns>The service collection with the repositories added.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the Domain or Infrastructure assemblies are not found.</exception>
-    public static IServiceCollection AddRepositories(
+    private static IServiceCollection AddRepositories(
         this IServiceCollection services,
         ServiceLifetime lifetime = ServiceLifetime.Scoped)
     {
