@@ -17,7 +17,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<CustomAspNetCoreResultEndpointProfile>();
 builder.Services.AddControllers();
 
-builder.Services.AddAuthorization();
 builder.Services.AddInfrastructure(options =>
 {
     options.DatabaseOptions = builder.Configuration.GetDatabaseOptions();

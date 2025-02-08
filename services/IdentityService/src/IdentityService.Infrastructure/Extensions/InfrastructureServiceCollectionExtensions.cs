@@ -59,6 +59,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddRepositories(options.RepositoryLifetime);
         services.AddAuthenticationServices(options.AuthenticationServicesLifetime);
         services.AddJwtAuthentication(options.JwtOptions);
+        services.AddAuthorizationServices();
 
         return services;
     }
@@ -133,6 +134,17 @@ public static class InfrastructureServiceCollectionExtensions
                     ClockSkew = TimeSpan.Zero
                 };
             });
+    }
+
+    /// <summary>
+    /// Registers the Authorization services.
+    /// </summary>
+    /// <param name="services">The service collection to add the Authorization services to.</param>
+    /// <returns>The service collection with the Authorization services added.</returns>
+    public static IServiceCollection AddAuthorizationServices(this IServiceCollection services)
+    {
+        services.AddAuthorization();
+        return services;
     }
 
     /// <summary>
