@@ -17,36 +17,28 @@ public class UserRepository : IUserRepository
 
     public async Task<Result<UserDomainModel>> CreateAsync(string email, string password)
     {
-        try
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        if (existingUser != null)
+            return Result.Fail(DomainErrors.Authentication.EmailAlreadyExists);
+
+        var user = Entities.IdentityUser.Create(email);
+        var result = await _userManager.CreateAsync(user, password);
+
+        if (!result.Succeeded)
         {
-            var existingUser = await _userManager.FindByEmailAsync(email);
-            if (existingUser != null)
-                return Result.Fail(DomainErrors.Authentication.EmailAlreadyExists);
-
-            var user = Entities.IdentityUser.Create(email);
-            var result = await _userManager.CreateAsync(user, password);
-
-            if (!result.Succeeded)
+            var errors = result.Errors.Select<IdentityError, IError>(e => e.Code switch
             {
-                // Map identity framework errors to domain errors
-                var errors = result.Errors.Select<IdentityError, IError>(e => e.Code switch
-                {
-                    "DuplicateEmail" => DomainErrors.Authentication.EmailAlreadyExists,
-                    "InvalidEmail" => DomainErrors.User.InvalidEmail,
-                    "PasswordTooShort" or "PasswordRequiresDigit" or "PasswordRequiresNonAlphanumeric"
-                        => DomainErrors.User.WeakPassword,
-                    _ => DomainErrors.User.CreationFailed(e.Description)
-                });
+                "DuplicateEmail" => DomainErrors.Authentication.EmailAlreadyExists,
+                "InvalidEmail" => DomainErrors.User.InvalidEmail,
+                "PasswordTooShort" or "PasswordRequiresDigit" or "PasswordRequiresNonAlphanumeric"
+                    => DomainErrors.User.WeakPassword,
+                _ => DomainErrors.User.CreationFailed(e.Description)
+            });
 
-                return Result.Fail(errors);
-            }
+            return Result.Fail(errors);
+        }
 
-            return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(new Error("An unexpected database error occurred").CausedBy(ex));
-        }
+        return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
     }
 
     public async Task<Result<bool>> CheckPasswordAsync(string userId, string password)
