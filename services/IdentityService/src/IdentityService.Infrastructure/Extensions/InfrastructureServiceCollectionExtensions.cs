@@ -88,7 +88,14 @@ public static class InfrastructureServiceCollectionExtensions
         // Without AddIdentity()
         // - you would have the database tables (as ApplicationDbContext inherits from IdentityDbContext)
         // - you wont be able to inject the UserManager, SignInManager, etc to services/controllers
-        services.AddIdentity<Persistence.Entities.IdentityUser, IdentityRole>()
+        services
+            .AddIdentity<Persistence.Entities.IdentityUser, IdentityRole>(options =>
+            {
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireDigit = false;
+            })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
@@ -104,7 +111,12 @@ public static class InfrastructureServiceCollectionExtensions
     public static void AddJwtAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
     {
         services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
