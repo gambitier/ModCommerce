@@ -5,5 +5,5 @@ namespace IdentityService.Application.Interfaces.Services;
 public interface IAuthenticationService
 {
     Task<Result<AuthResultDto>> RegisterUserAsync(CreateUserDto user, string password);
-    Task<Result<AuthResultDto>> AuthenticateAsync(string email, string password);
+    Task<Result<AuthResultDto>> AuthenticateAsync(LoginUserDto user);
 }

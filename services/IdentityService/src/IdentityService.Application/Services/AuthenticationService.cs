@@ -19,17 +19,17 @@ public class AuthenticationService : IAuthenticationService
         _tokenService = tokenService;
     }
 
-    public async Task<Result<AuthResultDto>> AuthenticateAsync(string email, string password)
+    public async Task<Result<AuthResultDto>> AuthenticateAsync(LoginUserDto user)
     {
-        var userResult = await _userRepository.FindByEmailAsync(email);
+        var userResult = await _userRepository.FindByEmailAsync(user.Email);
         if (userResult.IsFailed)
             return userResult.ToResult<AuthResultDto>();
 
-        var passwordResult = await _userRepository.CheckPasswordAsync(userResult.Value.Id, password);
+        var passwordResult = await _userRepository.CheckPasswordAsync(userResult.Value.Id, user.Password);
         if (passwordResult.IsFailed)
             return passwordResult.ToResult<AuthResultDto>();
 
-        var token = _tokenService.GenerateJwtToken(userResult.Value.Id, email);
+        var token = _tokenService.GenerateJwtToken(userResult.Value.Id, user.Email);
         return Result.Ok(new AuthResultDto(token));
     }
 

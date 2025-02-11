@@ -4,6 +4,8 @@ using IdentityService.API.Contracts.Users;
 using IdentityService.Application.Interfaces.Services;
 using System.Security.Claims;
 using FluentResults.Extensions.AspNetCore;
+using MapsterMapper;
+
 namespace IdentityService.API.Controllers;
 
 [Authorize]
@@ -12,10 +14,12 @@ namespace IdentityService.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IMapper _mapper;
 
-    public UsersController(IUserService userService)
+    public UsersController(IUserService userService, IMapper mapper)
     {
         _userService = userService;
+        _mapper = mapper;
     }
 
     [HttpGet("me")]
@@ -29,11 +33,6 @@ public class UsersController : ControllerBase
         if (result.IsFailed)
             return result.ToActionResult();
 
-        return new UserResponse
-        {
-            Id = result.Value.Id,
-            Email = result.Value.Email,
-            CreatedAt = result.Value.CreatedAt
-        };
+        return Ok(_mapper.Map<UserResponse>(result.Value));
     }
 }

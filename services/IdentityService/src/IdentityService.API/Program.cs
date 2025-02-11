@@ -5,6 +5,10 @@ using Scalar.AspNetCore;
 using IdentityService.API.Middleware;
 using FluentResults.Extensions.AspNetCore;
 using IdentityService.API.ErrorHandling;
+using Mapster;
+using System.Reflection;
+using IdentityService.Application.Mapping;
+using IdentityService.API.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 //add and validate options at startup
@@ -28,6 +32,14 @@ builder.Services.AddApplication(options =>
 {
     options.ServiceLifetime = ServiceLifetime.Scoped;
 });
+
+// Register Mapster
+builder.Services.AddMapster();
+TypeAdapterConfig.GlobalSettings.Scan(
+    Assembly.GetExecutingAssembly(),
+    typeof(ApplicationMappingConfig).Assembly,
+    typeof(ApiMappingConfig).Assembly
+);
 
 var app = builder.Build();
 

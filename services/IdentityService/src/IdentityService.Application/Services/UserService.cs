@@ -2,16 +2,19 @@ using FluentResults;
 using IdentityService.Application.Interfaces.Services;
 using IdentityService.Application.Models.Users;
 using IdentityService.Domain.Interfaces.Repositories;
+using MapsterMapper;
 
 namespace IdentityService.Application.Services;
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IMapper mapper)
     {
         _userRepository = userRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<UserDetailsDto>> GetCurrentUserAsync(string email)
@@ -20,11 +23,6 @@ public class UserService : IUserService
         if (result.IsFailed)
             return result.ToResult<UserDetailsDto>();
 
-        return Result.Ok(new UserDetailsDto
-        {
-            Id = result.Value.Id,
-            Email = result.Value.Email,
-            CreatedAt = result.Value.CreatedAt
-        });
+        return Result.Ok(_mapper.Map<UserDetailsDto>(result.Value));
     }
 }
