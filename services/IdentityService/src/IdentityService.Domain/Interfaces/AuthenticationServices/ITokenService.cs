@@ -1,6 +1,8 @@
+using IdentityService.Domain.Models;
+
 namespace IdentityService.Domain.Interfaces.AuthenticationServices;
 
 public interface ITokenService
 {
-    string GenerateJwtToken(string userId, string email);
+    AuthTokenInfo GenerateToken(string userId, string email);
 }

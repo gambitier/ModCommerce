@@ -29,8 +29,15 @@ public class AuthenticationService : IAuthenticationService
         if (passwordResult.IsFailed)
             return passwordResult.ToResult<AuthResultDto>();
 
-        var token = _tokenService.GenerateJwtToken(userResult.Value.Id, user.Email);
-        return Result.Ok(new AuthResultDto(token));
+        var tokenInfo = _tokenService.GenerateToken(userResult.Value.Id, user.Email);
+        return Result.Ok(new AuthResultDto
+        {
+            AccessToken = tokenInfo.AccessToken,
+            ExpiresIn = tokenInfo.ExpiresIn,
+            TokenType = tokenInfo.TokenType,
+            RefreshToken = tokenInfo.RefreshToken,
+            Scope = tokenInfo.Scope
+        });
     }
 
     public async Task<Result<AuthResultDto>> RegisterUserAsync(CreateUserDto user, string password)
@@ -39,7 +46,14 @@ public class AuthenticationService : IAuthenticationService
         if (result.IsFailed)
             return result.ToResult<AuthResultDto>();
 
-        var token = _tokenService.GenerateJwtToken(result.Value.Id, result.Value.Email);
-        return Result.Ok(new AuthResultDto(token));
+        var tokenInfo = _tokenService.GenerateToken(result.Value.Id, result.Value.Email);
+        return Result.Ok(new AuthResultDto
+        {
+            AccessToken = tokenInfo.AccessToken,
+            ExpiresIn = tokenInfo.ExpiresIn,
+            TokenType = tokenInfo.TokenType,
+            RefreshToken = tokenInfo.RefreshToken,
+            Scope = tokenInfo.Scope
+        });
     }
 }

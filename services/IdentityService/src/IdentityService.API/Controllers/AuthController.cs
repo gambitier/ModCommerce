@@ -37,8 +37,7 @@ public class AuthController : ControllerBase
     {
         var dto = _mapper.Map<LoginUserDto>(request);
         var result = await _authService.AuthenticateAsync(dto);
-        if (result.IsFailed || result.Value.Token == null)
-
+        if (result.IsFailed)
             return result.ToActionResult();
 
         return Ok(_mapper.Map<AuthResponse>(result.Value));

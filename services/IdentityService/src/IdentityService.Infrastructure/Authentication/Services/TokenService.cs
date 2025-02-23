@@ -5,6 +5,8 @@ using IdentityService.Infrastructure.Authentication.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using IdentityService.Domain.Interfaces.AuthenticationServices;
+using IdentityService.Domain.Constants;
+using IdentityService.Domain.Models;
 
 namespace IdentityService.Infrastructure.Authentication.Services;
 
@@ -17,14 +19,14 @@ public class TokenService : ITokenService
         _jwtOptions = jwtOptions.Value;
     }
 
-    public string GenerateJwtToken(string userId, string email)
+    public AuthTokenInfo GenerateToken(string userId, string email)
     {
         var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
-                new Claim(JwtRegisteredClaimNames.Email, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Unique token ID
-            };
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, userId),
+            new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -37,6 +39,12 @@ public class TokenService : ITokenService
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new AuthTokenInfo(
+            AccessToken: new JwtSecurityTokenHandler().WriteToken(token),
+            TokenType: TokenType.Bearer,
+            ExpiresIn: _jwtOptions.ExpirationMinutes * 60,
+            RefreshToken: null,
+            Scope: Scopes.ApiAccess
+        );
     }
 }
