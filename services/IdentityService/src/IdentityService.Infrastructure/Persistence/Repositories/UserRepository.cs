@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using FluentResults;
 using IdentityService.Domain.Errors;
 using IdentityService.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Infrastructure.Persistence.Repositories;
 
@@ -60,5 +61,11 @@ public class UserRepository : IUserRepository
             return Result.Fail(DomainErrors.Authentication.UserNotFound);
 
         return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
+    }
+
+    public async Task<Result<IEnumerable<UserDomainModel>>> GetAllAsync()
+    {
+        var users = await _userManager.Users.ToListAsync();
+        return Result.Ok(users.Select(u => UserDomainModel.Create(u.Id, u.Email!)));
     }
 }

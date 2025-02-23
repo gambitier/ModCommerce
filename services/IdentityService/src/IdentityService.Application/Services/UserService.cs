@@ -25,4 +25,13 @@ public class UserService : IUserService
 
         return Result.Ok(_mapper.Map<UserDetailsDto>(result.Value));
     }
+
+    public async Task<Result<IEnumerable<UserDetailsDto>>> GetAllUsersAsync()
+    {
+        var result = await _userRepository.GetAllAsync();
+        if (result.IsFailed)
+            return result.ToResult<IEnumerable<UserDetailsDto>>();
+
+        return Result.Ok(_mapper.Map<IEnumerable<UserDetailsDto>>(result.Value));
+    }
 }

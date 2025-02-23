@@ -15,5 +15,6 @@ public partial class ApiMappingConfig : IRegister
         config.NewConfig<LoginRequest, LoginUserDto>();
         config.NewConfig<AuthResultDto, AuthResponse>();
         config.NewConfig<UserDetailsDto, UserResponse>();
+        config.NewConfig<IEnumerable<UserDetailsDto>, IEnumerable<UserResponse>>();
     }
 }

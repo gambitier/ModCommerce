@@ -35,4 +35,17 @@ public class UsersController : ControllerBase
 
         return Ok(_mapper.Map<UserResponse>(result.Value));
     }
+
+    [HttpGet]
+    public async Task<ActionResult<UsersResponse>> GetAllUsers()
+    {
+        var result = await _userService.GetAllUsersAsync();
+        if (result.IsFailed)
+            return result.ToActionResult();
+
+        return Ok(new UsersResponse
+        {
+            Users = _mapper.Map<IEnumerable<UserResponse>>(result.Value)
+        });
+    }
 }

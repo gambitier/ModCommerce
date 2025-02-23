@@ -6,4 +6,5 @@ namespace IdentityService.Application.Interfaces.Services;
 public interface IUserService
 {
     Task<Result<UserDetailsDto>> GetCurrentUserAsync(string email);
+    Task<Result<IEnumerable<UserDetailsDto>>> GetAllUsersAsync();
 }
