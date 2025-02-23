@@ -42,4 +42,14 @@ public class AuthController : ControllerBase
 
         return Ok(_mapper.Map<AuthResponse>(result.Value));
     }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var result = await _authService.RefreshTokenAsync(request.RefreshToken);
+        if (result.IsFailed)
+            return result.ToActionResult();
+
+        return Ok(_mapper.Map<AuthResponse>(result.Value));
+    }
 }

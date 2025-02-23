@@ -44,19 +44,31 @@ public class UserRepository : IUserRepository
         return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
     }
 
-    public async Task<Result<bool>> CheckPasswordAsync(string userId, string password)
+    public async Task<Result<UserDomainModel>> VerifyUserPasswordAsync(string email, string password)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
             return Result.Fail(DomainErrors.Authentication.UserNotFound);
 
-        var result = await _userManager.CheckPasswordAsync(user, password);
-        return result ? Result.Ok(true) : Result.Fail(DomainErrors.Authentication.InvalidCredentials);
+        var isPwdValid = await _userManager.CheckPasswordAsync(user, password);
+
+        return isPwdValid
+            ? Result.Ok(UserDomainModel.Create(user.Id, user.Email!))
+            : Result.Fail(DomainErrors.Authentication.InvalidCredentials);
     }
 
     public async Task<Result<UserDomainModel>> FindByEmailAsync(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return Result.Fail(DomainErrors.Authentication.UserNotFound);
+
+        return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
+    }
+
+    public async Task<Result<UserDomainModel>> FindByIdAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
             return Result.Fail(DomainErrors.Authentication.UserNotFound);
 

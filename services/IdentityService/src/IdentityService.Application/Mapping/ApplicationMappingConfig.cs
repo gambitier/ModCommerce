@@ -9,7 +9,7 @@ public partial class ApplicationMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        // register all mappings here
         config.NewConfig<UserDomainModel, UserDetailsDto>();
+        config.NewConfig<AuthTokenInfo, AuthResultDto>();
     }
 }

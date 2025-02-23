@@ -7,6 +7,9 @@ public static class DomainErrors
         public static UnauthorizedError InvalidCredentials => new("Auth.InvalidCredentials",
             "Invalid email or password");
 
+        public static UnauthorizedError InvalidRefreshToken => new("Auth.InvalidRefreshToken",
+            "Invalid refresh token");
+
         public static ConflictError EmailAlreadyExists => new("Auth.EmailExists",
             "Email is already registered");
 
