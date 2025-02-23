@@ -16,20 +16,24 @@ public class UserRepository : IUserRepository
         _userManager = userManager;
     }
 
-    public async Task<Result<UserDomainModel>> CreateAsync(string email, string password)
+    public async Task<Result<UserDomainModel>> CreateAsync(string username, string email, string password)
     {
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser != null)
-            return Result.Fail(DomainErrors.Authentication.EmailAlreadyExists);
+            return Result.Fail(DomainErrors.User.EmailAlreadyExists);
 
-        var user = Entities.IdentityUser.Create(email);
+        var existingUsername = await _userManager.FindByNameAsync(username);
+        if (existingUsername != null)
+            return Result.Fail(DomainErrors.User.UsernameAlreadyExists);
+
+        var user = Entities.IdentityUser.Create(username, email);
         var result = await _userManager.CreateAsync(user, password);
 
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select<IdentityError, IError>(e => e.Code switch
             {
-                nameof(IdentityErrorDescriber.DuplicateEmail) => DomainErrors.Authentication.EmailAlreadyExists,
+                nameof(IdentityErrorDescriber.DuplicateEmail) => DomainErrors.User.EmailAlreadyExists,
                 nameof(IdentityErrorDescriber.InvalidEmail) => DomainErrors.User.InvalidEmail,
                 nameof(IdentityErrorDescriber.PasswordTooShort) or
                 nameof(IdentityErrorDescriber.PasswordRequiresDigit) or
@@ -44,11 +48,13 @@ public class UserRepository : IUserRepository
         return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
     }
 
-    public async Task<Result<UserDomainModel>> VerifyUserPasswordAsync(string email, string password)
+    public async Task<Result<UserDomainModel>> VerifyUserPasswordAsync(string usernameOrEmail, string password)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByEmailAsync(usernameOrEmail)
+                ?? await _userManager.FindByNameAsync(usernameOrEmail);
+
         if (user == null)
-            return Result.Fail(DomainErrors.Authentication.UserNotFound);
+            return Result.Fail(DomainErrors.User.UserNotFound);
 
         var isPwdValid = await _userManager.CheckPasswordAsync(user, password);
 
@@ -61,7 +67,7 @@ public class UserRepository : IUserRepository
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
-            return Result.Fail(DomainErrors.Authentication.UserNotFound);
+            return Result.Fail(DomainErrors.User.UserNotFound);
 
         return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
     }
@@ -70,7 +76,7 @@ public class UserRepository : IUserRepository
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
-            return Result.Fail(DomainErrors.Authentication.UserNotFound);
+            return Result.Fail(DomainErrors.User.UserNotFound);
 
         return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
     }

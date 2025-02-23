@@ -4,6 +4,11 @@ namespace IdentityService.API.Contracts.Auth;
 
 public class RegisterRequest
 {
+    [Required(ErrorMessage = "Username is required")]
+    [StringLength(100, ErrorMessage = "Username cannot exceed 100 characters")]
+    [RegularExpression(@"^[a-zA-Z0-9_-]+$", ErrorMessage = "Username can only contain letters, numbers, underscores and hyphens")]
+    public required string Username { get; set; }
+
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
     [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]

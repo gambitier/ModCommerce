@@ -23,9 +23,9 @@ public class AuthenticationService : IAuthenticationService
         _mapper = mapper;
     }
 
-    public async Task<Result<AuthResultDto>> AuthenticateAsync(LoginUserDto user)
+    public async Task<Result<AuthResultDto>> AuthenticateAsync(TokenRequestDto dto)
     {
-        var pwdCheckResult = await _userRepository.VerifyUserPasswordAsync(user.Email, user.Password);
+        var pwdCheckResult = await _userRepository.VerifyUserPasswordAsync(dto.UsernameOrEmail, dto.Password);
         if (pwdCheckResult.IsFailed)
             return pwdCheckResult.ToResult<AuthResultDto>();
 
@@ -38,9 +38,9 @@ public class AuthenticationService : IAuthenticationService
         return Result.Ok(_mapper.Map<AuthResultDto>(tokenResult.Value));
     }
 
-    public async Task<Result<AuthResultDto>> RegisterUserAsync(CreateUserDto user, string password)
+    public async Task<Result<AuthResultDto>> RegisterUserAsync(CreateUserDto dto, string password)
     {
-        var result = await _userRepository.CreateAsync(user.Email, password);
+        var result = await _userRepository.CreateAsync(dto.Username, dto.Email, password);
         if (result.IsFailed)
             return result.ToResult<AuthResultDto>();
 

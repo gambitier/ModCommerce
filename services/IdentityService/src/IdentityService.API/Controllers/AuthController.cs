@@ -32,10 +32,10 @@ public class AuthController : ControllerBase
         return Ok(_mapper.Map<AuthResponse>(result.Value));
     }
 
-    [HttpPost("login")]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+    [HttpPost("token")]
+    public async Task<ActionResult<AuthResponse>> Token([FromBody] TokenRequest request)
     {
-        var dto = _mapper.Map<LoginUserDto>(request);
+        var dto = _mapper.Map<TokenRequestDto>(request);
         var result = await _authService.AuthenticateAsync(dto);
         if (result.IsFailed)
             return result.ToActionResult();
@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
         return Ok(_mapper.Map<AuthResponse>(result.Value));
     }
 
-    [HttpPost("refresh")]
+    [HttpPost("token/refresh")]
     public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var result = await _authService.RefreshTokenAsync(request.RefreshToken);
