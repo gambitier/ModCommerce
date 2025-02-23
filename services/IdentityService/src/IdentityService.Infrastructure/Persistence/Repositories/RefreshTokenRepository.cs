@@ -42,7 +42,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         var entity = await _context.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.Token == token);
 
-        if (entity == null)
+        if (entity == null || entity.IsRevoked || entity.ExpiresAt < DateTime.UtcNow)
             return Result.Fail(DomainErrors.Authentication.InvalidRefreshToken);
 
         return Result.Ok(entity.ToDomain());

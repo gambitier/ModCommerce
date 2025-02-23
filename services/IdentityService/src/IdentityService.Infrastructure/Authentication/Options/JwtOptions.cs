@@ -24,6 +24,4 @@ public class RefreshTokenOptions
 {
     [Range(1, 365, ErrorMessage = "ExpirationDays must be between 1 and 365.")]
     public int ExpirationDays { get; set; } = 30;
-
-    public bool UseRotation { get; set; } = true;
 }

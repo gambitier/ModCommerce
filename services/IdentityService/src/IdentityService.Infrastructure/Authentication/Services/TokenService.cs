@@ -9,7 +9,6 @@ using IdentityService.Domain.Constants;
 using IdentityService.Domain.Models;
 using IdentityService.Domain.Interfaces.Repositories;
 using FluentResults;
-using IdentityService.Domain.Errors;
 
 namespace IdentityService.Infrastructure.Authentication.Services;
 
@@ -50,35 +49,29 @@ public class TokenService : ITokenService
     public async Task<Result<AuthTokenInfo>> RefreshToken(string refreshToken)
     {
         var tokenResult = await _refreshTokenRepository.FindByTokenAsync(refreshToken);
-        if (tokenResult.IsFailed
-            || tokenResult.Value == null
-            || tokenResult.Value.IsRevoked
-            || tokenResult.Value.ExpiresAt < DateTime.UtcNow)
-        {
-            return Result.Fail(DomainErrors.Authentication.InvalidRefreshToken);
-        }
-
-        var userResult = await _userRepository.FindByIdAsync(tokenResult.Value.UserId);
-        if (userResult.IsFailed)
-            return userResult.ToResult<AuthTokenInfo>();
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult<AuthTokenInfo>();
 
         var revokeResult = await _refreshTokenRepository.RevokeAsync(refreshToken);
         if (revokeResult.IsFailed)
             return revokeResult.ToResult<AuthTokenInfo>();
 
+        var userResult = await _userRepository.FindByIdAsync(tokenResult.Value.UserId);
+        if (userResult.IsFailed)
+            return userResult.ToResult<AuthTokenInfo>();
 
-        var newRefreshTokenResult = await _refreshTokenRepository.CreateAsync(
-            userResult.Value.Id,
+        var newTokenResult = await _refreshTokenRepository.CreateAsync(
+            tokenResult.Value.UserId,
             TimeSpan.FromDays(_jwtOptions.RefreshToken.ExpirationDays)
         );
-        if (newRefreshTokenResult.IsFailed)
-            return newRefreshTokenResult.ToResult<AuthTokenInfo>();
+        if (newTokenResult.IsFailed)
+            return newTokenResult.ToResult<AuthTokenInfo>();
 
         return Result.Ok(new AuthTokenInfo(
             AccessToken: GenerateAccessToken(userResult.Value.Id, userResult.Value.Email),
             TokenType: TokenType.Bearer,
             ExpiresIn: _jwtOptions.ExpirationMinutes * 60,
-            RefreshToken: newRefreshTokenResult.Value.Token,
+            RefreshToken: newTokenResult.Value.Token,
             Scope: Scopes.ApiAccess
         ));
     }
