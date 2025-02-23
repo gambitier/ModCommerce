@@ -9,6 +9,7 @@ using Mapster;
 using System.Reflection;
 using IdentityService.Application.Mapping;
 using IdentityService.API.Mapping;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 //add and validate options at startup
@@ -20,6 +21,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<CustomAspNetCoreResultEndpointProfile>();
 builder.Services.AddControllers();
+builder.Services.AddApiRateLimiting(builder.Configuration.GetRateLimitOptions());
 
 builder.Services.AddInfrastructure(options =>
 {

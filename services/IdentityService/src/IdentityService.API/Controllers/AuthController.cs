@@ -4,6 +4,7 @@ using IdentityService.Application.Interfaces.Services;
 using IdentityService.Application.Models;
 using FluentResults.Extensions.AspNetCore;
 using MapsterMapper;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace IdentityService.API.Controllers;
 
@@ -33,6 +34,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("token")]
+    [EnableRateLimiting("token")]
     public async Task<ActionResult<AuthResponse>> Token([FromBody] TokenRequest request)
     {
         var dto = _mapper.Map<TokenRequestDto>(request);
@@ -44,6 +46,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("token/refresh")]
+    [EnableRateLimiting("token")]
     public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var result = await _authService.RefreshTokenAsync(request.RefreshToken);
