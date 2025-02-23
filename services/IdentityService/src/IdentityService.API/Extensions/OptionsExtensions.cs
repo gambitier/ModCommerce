@@ -29,6 +29,12 @@ public static class OptionsExtensions
             .Bind(configuration.GetSection(ConfigurationConstants.DatabaseSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services
+            .AddOptions<RateLimitOptions>()
+            .Bind(configuration.GetSection(ConfigurationConstants.RateLimitSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
     }
 
     public static JwtOptions GetJwtOptions(this IConfiguration configuration)
@@ -41,5 +47,11 @@ public static class OptionsExtensions
     {
         return configuration.GetSection(ConfigurationConstants.DatabaseSection).Get<DatabaseOptions>()
             ?? throw new InvalidOperationException("Database options are not configured");
+    }
+
+    public static RateLimitOptions GetRateLimitOptions(this IConfiguration configuration)
+    {
+        return configuration.GetSection(ConfigurationConstants.RateLimitSection).Get<RateLimitOptions>()
+            ?? throw new InvalidOperationException("Rate limit options are not configured");
     }
 }
