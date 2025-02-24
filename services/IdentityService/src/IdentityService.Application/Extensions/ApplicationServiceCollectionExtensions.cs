@@ -42,6 +42,8 @@ public static class ApplicationServiceCollectionExtensions
         // For example:
         // services.AddAutoMapper(...);
         // services.AddValidators(...);
+        
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
         return services;
     }

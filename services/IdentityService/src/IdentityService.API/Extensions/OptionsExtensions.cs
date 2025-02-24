@@ -1,6 +1,7 @@
 using IdentityService.Infrastructure.Persistence.Options;
 using IdentityService.API.Constants;
 using IdentityService.Infrastructure.Authentication.Options;
+using IdentityService.Infrastructure.Communication.Options;
 
 namespace IdentityService.API.Extensions;
 
@@ -29,6 +30,12 @@ public static class OptionsExtensions
             .Bind(configuration.GetSection(ConfigurationConstants.DatabaseSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services
+            .AddOptions<EmailOptions>()
+            .Bind(configuration.GetSection(ConfigurationConstants.EmailSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
     }
 
     public static JwtOptions GetJwtOptions(this IConfiguration configuration)
@@ -41,5 +48,11 @@ public static class OptionsExtensions
     {
         return configuration.GetSection(ConfigurationConstants.DatabaseSection).Get<DatabaseOptions>()
             ?? throw new InvalidOperationException("Database options are not configured");
+    }
+
+    public static EmailOptions GetEmailOptions(this IConfiguration configuration)
+    {
+        return configuration.GetSection(ConfigurationConstants.EmailSection).Get<EmailOptions>()
+            ?? throw new InvalidOperationException("Email options are not configured");
     }
 }
