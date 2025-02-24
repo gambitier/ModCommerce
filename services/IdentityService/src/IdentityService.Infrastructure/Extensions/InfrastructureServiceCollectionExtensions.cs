@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using IdentityService.Infrastructure.Authentication.Options;
+using IdentityService.Domain.Interfaces.Persistence;
+using IdentityService.Infrastructure.Persistence;
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -56,6 +58,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddDbContext(options.DatabaseOptions);
         services.AddIdentity();
+        services.AddUnitOfWork();
         services.AddRepositories(options.RepositoryLifetime);
         services.AddAuthenticationServices(options.AuthenticationServicesLifetime);
         services.AddJwtAuthentication(options.JwtOptions);
@@ -214,6 +217,12 @@ public static class InfrastructureServiceCollectionExtensions
             services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
         }
 
+        return services;
+    }
+
+    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
 }
