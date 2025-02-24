@@ -1,6 +1,5 @@
 using FluentResults;
 using IdentityService.Domain.Interfaces.Persistence;
-using IdentityService.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 

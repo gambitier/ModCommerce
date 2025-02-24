@@ -1,5 +1,4 @@
 using IdentityService.Domain.Interfaces.Repositories;
-using IdentityService.Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using IdentityService.Infrastructure.Persistence.Mappings;
 using System.Security.Cryptography;

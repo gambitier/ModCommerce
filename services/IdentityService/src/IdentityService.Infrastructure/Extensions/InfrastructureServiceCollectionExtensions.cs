@@ -1,4 +1,4 @@
-using IdentityService.Infrastructure.Persistence.Data;
+using IdentityService.Infrastructure.Persistence;
 using IdentityService.Infrastructure.Persistence.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,6 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using IdentityService.Infrastructure.Authentication.Options;
 using IdentityService.Domain.Interfaces.Persistence;
-using IdentityService.Infrastructure.Persistence;
 
 namespace IdentityService.Infrastructure.Extensions;
 
