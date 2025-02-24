@@ -2,17 +2,51 @@ using FluentResults;
 using IdentityService.Domain.Interfaces.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using MediatR;
+using IdentityService.Domain.Interfaces.Events;
 
 namespace IdentityService.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMediator _mediator;
     private IDbContextTransaction? _currentTransaction;
 
-    public UnitOfWork(ApplicationDbContext context)
+    public UnitOfWork(ApplicationDbContext context, IMediator mediator)
     {
         _context = context;
+        _mediator = mediator;
+    }
+
+    /// <summary>
+    /// Publishes domain events for entities that were modified during SaveChanges.
+    /// Only publishes if there is no active transaction to prevent premature event publishing.
+    /// Domain events should only be published after the entire transaction is committed
+    /// to maintain data consistency and prevent side effects from failed transactions.
+    /// </summary>
+    /// <remarks>
+    /// If domain events were published during an active transaction and that transaction
+    /// later rolled back, the events would represent state changes that never actually
+    /// persisted to the database.
+    /// </remarks>
+    private async Task PublishDomainEvents()
+    {
+        if (_currentTransaction is not null)
+            return;
+
+        var domainEvents = _context.ChangeTracker.Entries<IHasDomainEvents>()
+            .SelectMany(x => x.Entity.DomainEvents)
+            .ToList();
+
+        foreach (var domainEvent in domainEvents)
+        {
+            await _mediator.Publish(domainEvent);
+        }
+
+        _context.ChangeTracker.Entries<IHasDomainEvents>()
+            .ToList()
+            .ForEach(e => e.Entity.ClearDomainEvents());
     }
 
     public async Task<Result> SaveChangesAsync()
@@ -20,6 +54,11 @@ public class UnitOfWork : IUnitOfWork
         try
         {
             await _context.SaveChangesAsync();
+
+            // If PublishDomainEvents is called within a transaction, events won't be published due to guard clause
+            // If PublishDomainEvents is called outside transaction, events will be published immediately
+            await PublishDomainEvents();
+
             return Result.Ok();
         }
         catch (DbUpdateException ex)
@@ -38,7 +77,10 @@ public class UnitOfWork : IUnitOfWork
         async Task<Result<T>> RollbackAndReturn(Result<T> result)
         {
             if (_currentTransaction is not null)
+            {
                 await _currentTransaction.RollbackAsync();
+                _currentTransaction = null;
+            }
 
             return result;
         }
@@ -59,6 +101,7 @@ public class UnitOfWork : IUnitOfWork
                     await _currentTransaction.CommitAsync();
 
                 _currentTransaction = null;
+                await PublishDomainEvents();
             }
 
             return result;
