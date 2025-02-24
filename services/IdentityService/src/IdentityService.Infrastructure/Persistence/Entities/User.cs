@@ -1,3 +1,4 @@
+using IdentityService.Domain.Events;
 using IdentityService.Domain.Interfaces.Events;
 
 namespace IdentityService.Infrastructure.Persistence.Entities;
@@ -19,10 +20,14 @@ public class IdentityUser : Microsoft.AspNetCore.Identity.IdentityUser, IHasDoma
 
     public static IdentityUser Create(string username, string email)
     {
-        return new IdentityUser
+        var user = new IdentityUser
         {
             UserName = username,
             Email = email,
         };
+
+        user.AddDomainEvent(new UserCreatedDomainEvent(user.Id, user.Email, user.UserName));
+
+        return user;
     }
 }

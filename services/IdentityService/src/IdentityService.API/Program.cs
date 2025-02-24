@@ -27,6 +27,7 @@ builder.Services.AddInfrastructure(options =>
     options.RepositoryLifetime = ServiceLifetime.Scoped;
     options.AuthenticationServicesLifetime = ServiceLifetime.Scoped;
     options.JwtOptions = builder.Configuration.GetJwtOptions();
+    options.EmailOptions = builder.Configuration.GetEmailOptions();
 });
 builder.Services.AddApplication(options =>
 {

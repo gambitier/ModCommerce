@@ -10,6 +10,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using IdentityService.Infrastructure.Authentication.Options;
 using IdentityService.Domain.Interfaces.Persistence;
+using IdentityService.Infrastructure.Communication.Options;
+using IdentityService.Domain.Interfaces.Communication;
+using IdentityService.Infrastructure.Communication;
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -33,6 +36,9 @@ public static class InfrastructureServiceCollectionExtensions
 
         [Required(ErrorMessage = "JwtOptions must be configured when calling AddInfrastructure")]
         public JwtOptions JwtOptions { get; set; } = null!;
+
+        [Required(ErrorMessage = "EmailOptions must be configured when calling AddInfrastructure")]
+        public EmailOptions EmailOptions { get; set; } = null!;
 
         public ServiceLifetime RepositoryLifetime { get; set; } = ServiceLifetime.Scoped;
         public ServiceLifetime AuthenticationServicesLifetime { get; set; } = ServiceLifetime.Scoped;
@@ -62,6 +68,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddAuthenticationServices(options.AuthenticationServicesLifetime);
         services.AddJwtAuthentication(options.JwtOptions);
         services.AddAuthorizationServices();
+        services.AddEmailService();
 
         return services;
     }
@@ -222,6 +229,21 @@ public static class InfrastructureServiceCollectionExtensions
     private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the email service with a transient lifetime.
+    /// </summary>
+    /// <remarks>
+    /// Using transient lifetime because:
+    /// 1. The service doesn't maintain shared state between requests
+    /// 2. Resources (SMTP connections) should be disposed quickly after use
+    /// 3. Avoids potential issues with stale connections in scoped lifetime
+    /// </remarks>
+    private static IServiceCollection AddEmailService(this IServiceCollection services)
+    {
+        services.AddTransient<IEmailService, EmailService>();
         return services;
     }
 }
