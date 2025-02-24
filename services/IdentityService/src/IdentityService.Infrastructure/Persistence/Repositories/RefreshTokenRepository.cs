@@ -31,8 +31,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             IsRevoked = false
         };
 
-        _context.RefreshTokens.Add(refreshToken);
-        await _context.SaveChangesAsync();
+        await _context.RefreshTokens.AddAsync(refreshToken);
 
         return Result.Ok(refreshToken.ToDomain());
     }
@@ -50,16 +49,14 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task<Result> RevokeAsync(string token)
     {
-        var entity = await _context.RefreshTokens
-            .FirstOrDefaultAsync(rt => rt.Token == token);
+        var rowsAffected = await _context.RefreshTokens
+            .Where(rt => rt.Token == token)
+            .ExecuteUpdateAsync(s =>
+                s.SetProperty(rt => rt.IsRevoked, true));
 
-        if (entity == null)
-            return Result.Fail(DomainErrors.Authentication.InvalidRefreshToken);
-
-        entity.IsRevoked = true;
-        await _context.SaveChangesAsync();
-
-        return Result.Ok();
+        return rowsAffected > 0
+            ? Result.Ok()
+            : Result.Fail(DomainErrors.Authentication.InvalidRefreshToken);
     }
 
     private static string GenerateUniqueToken()
