@@ -9,6 +9,9 @@ public static class DomainErrors
 
         public static UnauthorizedError InvalidRefreshToken => new("Auth.InvalidRefreshToken",
             "Invalid refresh token");
+
+        public static UnauthorizedError InvalidEmailConfirmationToken => new("Auth.InvalidEmailConfirmationToken",
+            "Invalid email confirmation token");
     }
 
     public static class User
@@ -30,5 +33,8 @@ public static class DomainErrors
 
         public static NotFoundError UserNotFound => new("User.UserNotFound",
             "User not found");
+
+        public static ConflictError EmailAlreadyConfirmed => new("User.EmailAlreadyConfirmed",
+            "Email is already confirmed");
     }
 }

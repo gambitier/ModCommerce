@@ -1,31 +1,21 @@
 using MediatR;
-using IdentityService.Domain.Interfaces.Communication;
 using IdentityService.Domain.Events;
+using IdentityService.Application.Interfaces.Services;
 
 public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDomainEvent>
 {
-    private readonly IEmailService _emailService;
+    private readonly IAuthenticationService _authenticationService;
 
-    public UserCreatedDomainEventHandler(IEmailService emailService)
+    public UserCreatedDomainEventHandler(
+        IAuthenticationService authenticationService)
     {
-        _emailService = emailService;
+        _authenticationService = authenticationService;
     }
 
     public async Task Handle(UserCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        // Generate confirmation link (this should come from a service)
-        var confirmationLink = $"https://your-domain.com/confirm-email?userId={notification.UserId}&token={GenerateToken()}";
-
-        await _emailService.SendConfirmationEmailAsync(
-            notification.Email,
-            notification.Username,
-            confirmationLink
-        );
-    }
-
-    private string GenerateToken()
-    {
-        // Implement token generation logic
-        return Guid.NewGuid().ToString();
+        var confirmationTokenResult = await _authenticationService.SendConfirmationEmailAsync(notification.Email);
+        if (confirmationTokenResult.IsFailed)
+            throw new Exception("Failed to generate confirmation token");
     }
 }
