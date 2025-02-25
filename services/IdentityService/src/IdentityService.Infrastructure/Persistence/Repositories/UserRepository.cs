@@ -45,7 +45,13 @@ public class UserRepository : IUserRepository
             return Result.Fail(errors);
         }
 
-        return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
+        return Result.Ok(new UserDomainModel
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            Username = user.UserName!,
+            EmailConfirmed = user.EmailConfirmed
+        });
     }
 
     public async Task<Result<UserDomainModel>> VerifyUserPasswordAsync(string usernameOrEmail, string password)
@@ -59,7 +65,13 @@ public class UserRepository : IUserRepository
         var isPwdValid = await _userManager.CheckPasswordAsync(user, password);
 
         return isPwdValid
-            ? Result.Ok(UserDomainModel.Create(user.Id, user.Email!))
+            ? Result.Ok(new UserDomainModel
+            {
+                Id = user.Id,
+                Email = user.Email!,
+                Username = user.UserName!,
+                EmailConfirmed = user.EmailConfirmed
+            })
             : Result.Fail(DomainErrors.Authentication.InvalidCredentials);
     }
 
@@ -69,7 +81,13 @@ public class UserRepository : IUserRepository
         if (user == null)
             return Result.Fail(DomainErrors.User.UserNotFound);
 
-        return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
+        return Result.Ok(new UserDomainModel
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            Username = user.UserName!,
+            EmailConfirmed = user.EmailConfirmed
+        });
     }
 
     public async Task<Result<UserDomainModel>> FindByIdAsync(string userId)
@@ -78,12 +96,53 @@ public class UserRepository : IUserRepository
         if (user == null)
             return Result.Fail(DomainErrors.User.UserNotFound);
 
-        return Result.Ok(UserDomainModel.Create(user.Id, user.Email!));
+        return Result.Ok(new UserDomainModel
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            Username = user.UserName!,
+            EmailConfirmed = user.EmailConfirmed
+        });
     }
 
     public async Task<Result<IEnumerable<UserDomainModel>>> GetAllAsync()
     {
         var users = await _userManager.Users.ToListAsync();
-        return Result.Ok(users.Select(u => UserDomainModel.Create(u.Id, u.Email!)));
+        return Result.Ok(users.Select(u => new UserDomainModel
+        {
+            Id = u.Id,
+            Email = u.Email!,
+            Username = u.UserName!,
+            EmailConfirmed = u.EmailConfirmed
+        }));
+    }
+
+    public async Task<Result<UserDomainModel>> ConfirmEmailAsync(string email, string token)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return Result.Fail(DomainErrors.User.UserNotFound);
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+            return Result.Fail(DomainErrors.Authentication.InvalidEmailConfirmationToken);
+
+        return Result.Ok(new UserDomainModel
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            Username = user.UserName!,
+            EmailConfirmed = true
+        });
+    }
+
+    public async Task<Result<string>> GenerateEmailConfirmationTokenAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return Result.Fail(DomainErrors.User.UserNotFound);
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        return Result.Ok(token);
     }
 }

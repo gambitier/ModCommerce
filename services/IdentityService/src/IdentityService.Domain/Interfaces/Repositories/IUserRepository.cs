@@ -10,4 +10,6 @@ public interface IUserRepository
     Task<Result<UserDomainModel>> FindByEmailAsync(string email);
     Task<Result<IEnumerable<UserDomainModel>>> GetAllAsync();
     Task<Result<UserDomainModel>> FindByIdAsync(string userId);
+    Task<Result<UserDomainModel>> ConfirmEmailAsync(string email, string token);
+    Task<Result<string>> GenerateEmailConfirmationTokenAsync(string email);
 }
