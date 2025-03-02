@@ -95,9 +95,22 @@ public class AuthenticationService : IAuthenticationService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var confirmationLink = $"{_applicationUrlOptions.BaseUrl}/confirm-email?token={tokenResult.Value}";
+        var queryParams = new Dictionary<string, string>
+        {
+            { "token", tokenResult.Value },
+            { "email", userResult.Value.Email }
+        };
 
-        await _emailService.SendConfirmationEmailAsync(userResult.Value.Email, userResult.Value.Username, confirmationLink);
+        var uriBuilder = new UriBuilder(_applicationUrlOptions.BaseUrl)
+        {
+            Path = _applicationUrlOptions.EmailConfirmationPath,
+            Query = string.Join("&", queryParams.Select(kvp =>
+                $"{Uri.EscapeDataString(kvp.Key)}={Uri.EscapeDataString(kvp.Value)}"))
+        };
+
+        var confirmationLink = uriBuilder.Uri;
+
+        await _emailService.SendConfirmationEmailAsync(userResult.Value.Email, userResult.Value.Username, confirmationLink.ToString());
 
         return Result.Ok();
     }
