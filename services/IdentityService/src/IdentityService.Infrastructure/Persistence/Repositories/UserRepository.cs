@@ -4,6 +4,8 @@ using FluentResults;
 using IdentityService.Domain.Errors;
 using IdentityService.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace IdentityService.Infrastructure.Persistence.Repositories;
 
@@ -148,6 +150,12 @@ public class UserRepository : IUserRepository
             return Result.Fail(DomainErrors.User.UserNotFound);
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        if (string.IsNullOrEmpty(token))
+            return Result.Fail(DomainErrors.User.EmailConfirmationTokenGenerationFailed);
+
+        // TODO: is base64url encoding needed?
+        // token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
         return Result.Ok(token);
     }
 
