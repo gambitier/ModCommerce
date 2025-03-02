@@ -64,9 +64,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("resend-confirmation")]
-    public async Task<ActionResult> ResendConfirmation([FromQuery] string email)
+    public async Task<ActionResult> ResendConfirmation([FromBody] ResendEmailConfirmationRequest request)
     {
-        var result = await _authService.SendConfirmationEmailAsync(email);
+        var result = await _authService.SendConfirmationEmailAsync(request.Email);
         if (result.IsFailed)
             return result.ToActionResult();
 
