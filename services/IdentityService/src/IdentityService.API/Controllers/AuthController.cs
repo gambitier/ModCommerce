@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult> Register([FromBody] RegisterRequest request)
     {
         var dto = _mapper.Map<CreateUserDto>(request);
         var result = await _authService.RegisterUserAsync(dto, request.Password);
@@ -29,7 +29,7 @@ public class AuthController : ControllerBase
         if (result.IsFailed)
             return result.ToActionResult();
 
-        return Ok(_mapper.Map<AuthResponse>(result.Value));
+        return Created();
     }
 
     [HttpPost("token")]
