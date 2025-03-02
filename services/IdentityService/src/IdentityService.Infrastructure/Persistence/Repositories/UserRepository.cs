@@ -123,17 +123,22 @@ public class UserRepository : IUserRepository
         if (user == null)
             return Result.Fail(DomainErrors.User.UserNotFound);
 
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-        if (!result.Succeeded)
-            return Result.Fail(DomainErrors.Authentication.InvalidEmailConfirmationToken);
-
-        return Result.Ok(new UserDomainModel
+        var successResponse = new UserDomainModel
         {
             Id = user.Id,
             Email = user.Email!,
             Username = user.UserName!,
             EmailConfirmed = true
-        });
+        };
+
+        if (user.EmailConfirmed)
+            return Result.Ok(successResponse);
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+            return Result.Fail(DomainErrors.Authentication.InvalidEmailConfirmationToken);
+
+        return Result.Ok(successResponse);
     }
 
     public async Task<Result<string>> GenerateEmailConfirmationTokenAsync(string email)
