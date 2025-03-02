@@ -15,20 +15,17 @@ public class AuthenticationService : IAuthenticationService
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
 
     public AuthenticationService(
         IUserRepository userRepository,
         ITokenService tokenService,
         IMapper mapper,
-        IUnitOfWork unitOfWork,
         IEmailService emailService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _mapper = mapper;
-        _unitOfWork = unitOfWork;
         _emailService = emailService;
     }
 
@@ -54,22 +51,13 @@ public class AuthenticationService : IAuthenticationService
         return Result.Ok(_mapper.Map<AuthResultDto>(tokenResult.Value));
     }
 
-    public async Task<Result<AuthResultDto>> RegisterUserAsync(CreateUserDto dto, string password)
-    {
-        return await _unitOfWork.ExecuteTransactionAsync(async () => await CreateUserWithTokenAsync(dto, password));
-    }
-
-    private async Task<Result<AuthResultDto>> CreateUserWithTokenAsync(CreateUserDto dto, string password)
+    public async Task<Result> RegisterUserAsync(CreateUserDto dto, string password)
     {
         var result = await _userRepository.CreateAsync(dto.Username, dto.Email, password);
         if (result.IsFailed)
-            return result.ToResult<AuthResultDto>();
+            return result.ToResult();
 
-        var tokenResult = await _tokenService.GenerateToken(result.Value.Id, result.Value.Email);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult<AuthResultDto>();
-
-        return Result.Ok(_mapper.Map<AuthResultDto>(tokenResult.Value));
+        return Result.Ok();
     }
 
     public async Task<Result<AuthResultDto>> RefreshTokenAsync(string refreshToken)
