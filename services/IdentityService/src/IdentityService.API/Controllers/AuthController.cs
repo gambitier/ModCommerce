@@ -53,10 +53,10 @@ public class AuthController : ControllerBase
         return Ok(_mapper.Map<AuthResponse>(result.Value));
     }
 
-    [HttpGet("confirm-email")]
-    public async Task<ActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
+    [HttpPost("confirm-email")]
+    public async Task<ActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
-        var result = await _authService.ConfirmEmailAsync(email, token);
+        var result = await _authService.ConfirmEmailAsync(request.Email, request.Token);
         if (result.IsFailed)
             return result.ToActionResult();
 
