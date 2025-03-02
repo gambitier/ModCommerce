@@ -34,6 +34,13 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<Result<AuthResultDto>> AuthenticateAsync(TokenRequestDto dto)
     {
+        var isEmailConfirmedResult = await _userRepository.IsEmailConfirmedAsync(dto.UsernameOrEmail);
+        if (isEmailConfirmedResult.IsFailed)
+            return isEmailConfirmedResult.ToResult<AuthResultDto>();
+
+        if (!isEmailConfirmedResult.Value)
+            return Result.Fail(DomainErrors.User.EmailNotConfirmed);
+
         var pwdCheckResult = await _userRepository.VerifyUserPasswordAsync(dto.UsernameOrEmail, dto.Password);
         if (pwdCheckResult.IsFailed)
             return pwdCheckResult.ToResult<AuthResultDto>();

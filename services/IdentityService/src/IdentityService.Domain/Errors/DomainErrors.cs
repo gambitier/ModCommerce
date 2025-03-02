@@ -36,5 +36,8 @@ public static class DomainErrors
 
         public static ConflictError EmailAlreadyConfirmed => new("User.EmailAlreadyConfirmed",
             "Email is already confirmed");
+
+        public static ConflictError EmailNotConfirmed => new("User.EmailNotConfirmed",
+            "Email is not confirmed");
     }
 }

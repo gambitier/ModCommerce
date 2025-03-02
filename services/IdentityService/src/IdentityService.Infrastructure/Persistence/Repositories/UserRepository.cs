@@ -145,4 +145,15 @@ public class UserRepository : IUserRepository
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         return Result.Ok(token);
     }
+
+    public async Task<Result<bool>> IsEmailConfirmedAsync(string UsernameOrEmail)
+    {
+        var user = await _userManager.FindByEmailAsync(UsernameOrEmail)
+                ?? await _userManager.FindByNameAsync(UsernameOrEmail);
+
+        if (user == null)
+            return Result.Fail(DomainErrors.User.UserNotFound);
+
+        return Result.Ok(user.EmailConfirmed);
+    }
 }
