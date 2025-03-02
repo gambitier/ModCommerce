@@ -153,9 +153,6 @@ public class UserRepository : IUserRepository
         if (string.IsNullOrEmpty(token))
             return Result.Fail(DomainErrors.User.EmailConfirmationTokenGenerationFailed);
 
-        // TODO: is base64url encoding needed?
-        // token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
         return Result.Ok(token);
     }
 

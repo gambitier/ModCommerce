@@ -43,6 +43,12 @@ public static class OptionsExtensions
             .Bind(configuration.GetSection(ConfigurationConstants.ApplicationSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services
+            .AddOptions<EmailConfirmationTokenProviderOptions>()
+            .Bind(configuration.GetSection(ConfigurationConstants.EmailConfirmationSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
     }
 
     public static JwtOptions GetJwtOptions(this IConfiguration configuration)

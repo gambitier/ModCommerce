@@ -13,6 +13,7 @@ using IdentityService.Domain.Interfaces.Persistence;
 using IdentityService.Infrastructure.Communication.Options;
 using IdentityService.Domain.Interfaces.Communication;
 using IdentityService.Infrastructure.Communication;
+using IdentityService.Infrastructure.Authentication.Services;
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -94,6 +95,9 @@ public static class InfrastructureServiceCollectionExtensions
     /// <returns>The service collection with the Identity services added.</returns>
     private static IServiceCollection AddIdentity(this IServiceCollection services)
     {
+        const string EmailConfirmationTokenProvider = "CustomEmailConfirmation";
+        services.AddTransient<CustomEmailConfirmationTokenProvider<Persistence.Entities.IdentityUser>>();
+
         // AddIdentity() registers the services needed to manage users, handle authentication, etc
         // Without AddIdentity()
         // - you would have the database tables (as ApplicationDbContext inherits from IdentityDbContext)
@@ -105,6 +109,11 @@ public static class InfrastructureServiceCollectionExtensions
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireDigit = false;
+
+                options.Tokens.EmailConfirmationTokenProvider = EmailConfirmationTokenProvider;
+                options.Tokens.ProviderMap.Add(EmailConfirmationTokenProvider,
+                    new TokenProviderDescriptor(
+                        typeof(CustomEmailConfirmationTokenProvider<Persistence.Entities.IdentityUser>)));
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
