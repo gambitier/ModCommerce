@@ -8,6 +8,7 @@ using IdentityService.Domain.Interfaces.Communication;
 using IdentityService.Domain.Errors;
 using Microsoft.Extensions.Options;
 using IdentityService.Application.Options;
+using IdentityService.Domain.Interfaces.Persistence;
 
 namespace IdentityService.Application.Services;
 
@@ -18,19 +19,23 @@ public class AuthenticationService : IAuthenticationService
     private readonly IMapper _mapper;
     private readonly IEmailService _emailService;
     private readonly ApplicationUrlOptions _applicationUrlOptions;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AuthenticationService(
         IUserRepository userRepository,
         ITokenService tokenService,
         IMapper mapper,
         IEmailService emailService,
-        IOptions<ApplicationUrlOptions> options)
+        IOptions<ApplicationUrlOptions> options,
+        IUnitOfWork unitOfWork
+    )
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _mapper = mapper;
         _emailService = emailService;
         _applicationUrlOptions = options.Value;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<AuthResultDto>> AuthenticateAsync(TokenRequestDto dto)
@@ -60,6 +65,8 @@ public class AuthenticationService : IAuthenticationService
         var result = await _userRepository.CreateAsync(dto.Username, dto.Email, password);
         if (result.IsFailed)
             return result.ToResult();
+
+        await _unitOfWork.SaveChangesAsync();
 
         return Result.Ok();
     }
