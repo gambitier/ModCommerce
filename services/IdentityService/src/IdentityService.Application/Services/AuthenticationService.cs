@@ -4,9 +4,10 @@ using IdentityService.Application.Models;
 using IdentityService.Domain.Interfaces.AuthenticationServices;
 using FluentResults;
 using MapsterMapper;
-using IdentityService.Domain.Interfaces.Persistence;
 using IdentityService.Domain.Interfaces.Communication;
 using IdentityService.Domain.Errors;
+using Microsoft.Extensions.Options;
+using IdentityService.Application.Options;
 
 namespace IdentityService.Application.Services;
 
@@ -16,17 +17,20 @@ public class AuthenticationService : IAuthenticationService
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
     private readonly IEmailService _emailService;
+    private readonly ApplicationUrlOptions _applicationUrlOptions;
 
     public AuthenticationService(
         IUserRepository userRepository,
         ITokenService tokenService,
         IMapper mapper,
-        IEmailService emailService)
+        IEmailService emailService,
+        IOptions<ApplicationUrlOptions> options)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _mapper = mapper;
         _emailService = emailService;
+        _applicationUrlOptions = options.Value;
     }
 
     public async Task<Result<AuthResultDto>> AuthenticateAsync(TokenRequestDto dto)
@@ -91,7 +95,7 @@ public class AuthenticationService : IAuthenticationService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var confirmationLink = $"https://your-domain.com/confirm-email?token={tokenResult.Value}";
+        var confirmationLink = $"{_applicationUrlOptions.BaseUrl}/confirm-email?token={tokenResult.Value}";
 
         await _emailService.SendConfirmationEmailAsync(userResult.Value.Email, userResult.Value.Username, confirmationLink);
 

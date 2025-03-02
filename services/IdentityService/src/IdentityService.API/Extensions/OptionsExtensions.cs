@@ -2,6 +2,7 @@ using IdentityService.Infrastructure.Persistence.Options;
 using IdentityService.API.Constants;
 using IdentityService.Infrastructure.Authentication.Options;
 using IdentityService.Infrastructure.Communication.Options;
+using IdentityService.Application.Options;
 
 namespace IdentityService.API.Extensions;
 
@@ -34,6 +35,12 @@ public static class OptionsExtensions
         services
             .AddOptions<EmailOptions>()
             .Bind(configuration.GetSection(ConfigurationConstants.EmailSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services
+            .AddOptions<ApplicationUrlOptions>()
+            .Bind(configuration.GetSection(ConfigurationConstants.ApplicationSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }
