@@ -34,7 +34,7 @@ public static class DomainErrors
         public static NotFoundError UserNotFound => new("User.UserNotFound",
             "User not found");
 
-        public static ConflictError EmailAlreadyConfirmed => new("User.EmailAlreadyConfirmed",
+        public static ValidationError EmailAlreadyConfirmed => new("User.EmailAlreadyConfirmed",
             "Email is already confirmed");
 
         public static ValidationError EmailNotConfirmed => new("User.EmailNotConfirmed",
