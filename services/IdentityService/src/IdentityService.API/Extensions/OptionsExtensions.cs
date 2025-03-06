@@ -14,17 +14,15 @@ public static class OptionsExtensions
     /// <summary>
     /// Add options to the service collection.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configuration"></param>
-    public static void AddOptions(this IServiceCollection services, IConfiguration configuration)
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <param name="infrastructureSections">The infrastructure sections.</param>
+    public static void AddOptions(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        InfrastructureConfigurationSections infrastructureSections)
     {
-        services.AddInfrastructureOptions(configuration, new InfrastructureConfigurationSections
-        {
-            JwtSection = ConfigurationConstants.JwtSection,
-            DatabaseSection = ConfigurationConstants.DatabaseSection,
-            EmailSection = ConfigurationConstants.EmailSection,
-            EmailConfirmationSection = ConfigurationConstants.EmailConfirmationSection
-        });
+        services.AddInfrastructureOptions(configuration, infrastructureSections);
 
         // Add application-specific options
         services
@@ -32,5 +30,19 @@ public static class OptionsExtensions
             .Bind(configuration.GetSection(ConfigurationConstants.ApplicationSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+    }
+
+    /// <summary>
+    /// Convenience method to get options from the configuration.
+    /// </summary>
+    /// <typeparam name="T">The type of the options.</typeparam>
+    /// <param name="configuration">The configuration.</param>
+    /// <param name="section">The section of the options.</param>
+    /// <returns>The options.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the options are not configured.</exception>
+    public static T GetOptions<T>(this IConfiguration configuration, string section) where T : class
+    {
+        return configuration.GetSection(section).Get<T>()
+            ?? throw new InvalidOperationException($"{section} are not configured");
     }
 }

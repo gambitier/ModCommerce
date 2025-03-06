@@ -12,8 +12,10 @@ using IdentityService.Domain.Interfaces.Persistence;
 using IdentityService.Domain.Interfaces.Communication;
 using IdentityService.Infrastructure.Communication;
 using IdentityService.Infrastructure.Authentication.Services;
-using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
+using IdentityService.Infrastructure.Authentication.Interfaces;
+using Microsoft.Extensions.Options;
+
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -29,6 +31,14 @@ public static class InfrastructureServiceCollectionExtensions
     {
         public ServiceLifetime RepositoryLifetime { get; set; } = ServiceLifetime.Scoped;
         public ServiceLifetime AuthenticationServicesLifetime { get; set; } = ServiceLifetime.Scoped;
+
+        /// <summary>
+        /// Configuration sections defined in appsettings.json for the infrastructure services.
+        /// - The null! annotation indicates this property must be set during initialization,
+        /// even though it's initially null. This is validated using the Required attribute.
+        /// </summary>
+        [Required(ErrorMessage = "Infrastructure configuration sections are required")]
+        public InfrastructureConfigurationSections InfraConfigSections { get; set; } = null!;
     }
 
     /// <summary>
@@ -47,20 +57,17 @@ public static class InfrastructureServiceCollectionExtensions
         configureOptions(options);
 
         // Validate options using Data Annotations
-        Validator.ValidateObject(options, new ValidationContext(options), validateAllProperties: true);
+        Validator.ValidateObject(
+            options,
+            new ValidationContext(options),
+            validateAllProperties: true);
 
-        services.AddDbContext(
-            configuration.Get<DatabaseOptions>()
-            ?? throw new InvalidOperationException("DatabaseOptions should be configured")
-        );
+        services.AddDbContext();
         services.AddIdentity();
         services.AddUnitOfWork();
         services.AddRepositories(options.RepositoryLifetime);
         services.AddAuthenticationServices(options.AuthenticationServicesLifetime);
-        services.AddJwtAuthentication(
-            configuration.Get<JwtOptions>()
-            ?? throw new InvalidOperationException("JwtOptions should be configured")
-        );
+        services.AddJwtAuthentication(configuration.GetOptions<JwtOptions>(options.InfraConfigSections.JwtSection));
         services.AddAuthorizationServices();
         services.AddEmailService();
 
@@ -73,10 +80,13 @@ public static class InfrastructureServiceCollectionExtensions
     /// <param name="services">The service collection to add the DbContext to.</param>
     /// <param name="databaseOptions">The database options.</param>
     /// <returns>The service collection with the DbContext added.</returns>
-    private static IServiceCollection AddDbContext(this IServiceCollection services, DatabaseOptions databaseOptions)
+    private static IServiceCollection AddDbContext(this IServiceCollection services)
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(databaseOptions.ConnectionString));
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
+            var dbOptions = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            options.UseNpgsql(dbOptions.ConnectionString);
+        });
 
         return services;
     }
@@ -122,13 +132,6 @@ public static class InfrastructureServiceCollectionExtensions
     /// <returns>The service collection with the JWT authentication services added.</returns>
     private static void AddJwtAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
     {
-        using var rsa = RSA.Create();
-        rsa.ImportFromPem(jwtOptions.PublicKeyPem);
-        var securityKey = new RsaSecurityKey(rsa.ExportParameters(false))
-        {
-            KeyId = jwtOptions.KeyId
-        };
-
         services
             .AddAuthentication(options =>
             {
@@ -138,19 +141,27 @@ public static class InfrastructureServiceCollectionExtensions
             })
             .AddJwtBearer(options =>
             {
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        var keyManager = context.HttpContext.RequestServices
+                            .GetRequiredService<IJwtKeyManagerService>();
+
+                        context.SecurityToken.SigningKey = keyManager.GetActiveSecurityKey();
+                        return Task.CompletedTask;
+                    }
+                };
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
-
                     ValidateIssuer = true,
                     ValidIssuer = jwtOptions.Issuer,
-
                     ValidateAudience = true,
                     ValidAudience = jwtOptions.Audience,
-
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = securityKey
+                    ValidateIssuerSigningKey = true
                 };
             });
     }
@@ -167,7 +178,7 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the Authentication services.
+    /// Registers the Authentication related services.
     /// </summary>
     /// <param name="services">The service collection to add the Authentication services to.</param>
     /// <param name="lifetime">The lifetime of the Authentication services.</param>
@@ -195,6 +206,9 @@ public static class InfrastructureServiceCollectionExtensions
 
             services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
         }
+
+        // IJwtKeyManagerService service stays as only usable within the Infrastructure project
+        services.AddSingleton<IJwtKeyManagerService, JwtKeyManagerService>();
 
         return services;
     }
