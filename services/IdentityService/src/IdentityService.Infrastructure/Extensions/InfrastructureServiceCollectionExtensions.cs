@@ -15,6 +15,7 @@ using IdentityService.Infrastructure.Authentication.Services;
 using Microsoft.Extensions.Configuration;
 using IdentityService.Infrastructure.Authentication.Interfaces;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 
 namespace IdentityService.Infrastructure.Extensions;
@@ -141,17 +142,9 @@ public static class InfrastructureServiceCollectionExtensions
             })
             .AddJwtBearer(options =>
             {
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = context =>
-                    {
-                        var keyManager = context.HttpContext.RequestServices
-                            .GetRequiredService<IJwtKeyManagerService>();
-
-                        context.SecurityToken.SigningKey = keyManager.GetActiveSecurityKey();
-                        return Task.CompletedTask;
-                    }
-                };
+                var serviceProvider = services.BuildServiceProvider();
+                var keyManager = serviceProvider.GetRequiredService<IJwtKeyManagerService>();
+                var logger = serviceProvider.GetRequiredService<ILogger<JwtBearerEvents>>();
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -161,7 +154,37 @@ public static class InfrastructureServiceCollectionExtensions
                     ValidIssuer = jwtOptions.Issuer,
                     ValidateAudience = true,
                     ValidAudience = jwtOptions.Audience,
-                    ValidateIssuerSigningKey = true
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                    {
+                        if (string.IsNullOrEmpty(kid))
+                        {
+                            logger.LogInformation("No kid in token, using active key");
+                            return [keyManager.GetActiveSecurityKey()];
+                        }
+
+                        try
+                        {
+                            var publicKey = keyManager.GetPublicKey(kid);
+                            logger.LogInformation("Using key with kid: {Kid}", kid);
+                            return [new RsaSecurityKey(publicKey) { KeyId = kid }];
+                        }
+                        catch
+                        {
+                            logger.LogError("Invalid key identifier: {Kid}", kid);
+                            return [];
+                        }
+                    }
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        // Optional: Keep logging in OnTokenValidated for debugging
+                        logger.LogInformation("Token validated successfully");
+                        return Task.CompletedTask;
+                    }
                 };
             });
     }
