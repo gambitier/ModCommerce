@@ -159,8 +159,9 @@ public static class InfrastructureServiceCollectionExtensions
                     {
                         if (string.IsNullOrEmpty(kid))
                         {
-                            logger.LogInformation("No kid in token, using active key");
-                            return [keyManager.GetActiveSecurityKey()];
+                            // this condition should never happen with properly signed tokens
+                            logger.LogWarning("Received token without kid");
+                            return []; // Reject tokens without kid
                         }
 
                         try
