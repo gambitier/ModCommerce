@@ -1,8 +1,6 @@
-using IdentityService.Infrastructure.Persistence.Options;
 using IdentityService.API.Constants;
-using IdentityService.Infrastructure.Authentication.Options;
-using IdentityService.Infrastructure.Communication.Options;
 using IdentityService.Application.Options;
+using IdentityService.Infrastructure.Extensions;
 
 namespace IdentityService.API.Extensions;
 
@@ -20,52 +18,19 @@ public static class OptionsExtensions
     /// <param name="configuration"></param>
     public static void AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services
-            .AddOptions<JwtOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.JwtSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddInfrastructureOptions(configuration, new InfrastructureConfigurationSections
+        {
+            JwtSection = ConfigurationConstants.JwtSection,
+            DatabaseSection = ConfigurationConstants.DatabaseSection,
+            EmailSection = ConfigurationConstants.EmailSection,
+            EmailConfirmationSection = ConfigurationConstants.EmailConfirmationSection
+        });
 
-        services
-            .AddOptions<DatabaseOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.DatabaseSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services
-            .AddOptions<EmailOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.EmailSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
+        // Add application-specific options
         services
             .AddOptions<ApplicationUrlOptions>()
             .Bind(configuration.GetSection(ConfigurationConstants.ApplicationSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-
-        services
-            .AddOptions<EmailConfirmationTokenProviderOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.EmailConfirmationSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-    }
-
-    public static JwtOptions GetJwtOptions(this IConfiguration configuration)
-    {
-        return configuration.GetSection(ConfigurationConstants.JwtSection).Get<JwtOptions>()
-            ?? throw new InvalidOperationException("JWT options are not configured");
-    }
-
-    public static DatabaseOptions GetDatabaseOptions(this IConfiguration configuration)
-    {
-        return configuration.GetSection(ConfigurationConstants.DatabaseSection).Get<DatabaseOptions>()
-            ?? throw new InvalidOperationException("Database options are not configured");
-    }
-
-    public static EmailOptions GetEmailOptions(this IConfiguration configuration)
-    {
-        return configuration.GetSection(ConfigurationConstants.EmailSection).Get<EmailOptions>()
-            ?? throw new InvalidOperationException("Email options are not configured");
     }
 }
