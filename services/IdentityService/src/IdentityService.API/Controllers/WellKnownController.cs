@@ -19,7 +19,7 @@ public class WellKnownController : ControllerBase
     {
         return Ok(new
         {
-            keys = new[] { _authService.GetJsonWebKey() }
+            keys = _authService.GetJsonWebKeys()
         });
     }
 }

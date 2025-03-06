@@ -123,8 +123,8 @@ public class AuthenticationService : IAuthenticationService
         return Result.Ok();
     }
 
-    public JsonWebKeyInfo GetJsonWebKey()
+    public JsonWebKeyInfo[] GetJsonWebKeys()
     {
-        return _tokenService.GetJsonWebKey();
+        return _tokenService.GetJsonWebKeys();
     }
 }
