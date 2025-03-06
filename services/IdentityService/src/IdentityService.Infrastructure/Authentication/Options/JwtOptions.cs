@@ -4,24 +4,37 @@ namespace IdentityService.Infrastructure.Authentication.Options;
 
 public class JwtOptions
 {
-    [Required]
-    public required string Secret { get; set; }
+    [Required(ErrorMessage = "KeyId is required")]
+    [StringLength(int.MaxValue, MinimumLength = 1, ErrorMessage = "KeyId cannot be empty")]
+    public required string KeyId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "PrivateKeyPem is required")]
+    [StringLength(int.MaxValue, MinimumLength = 1, ErrorMessage = "PrivateKeyPem cannot be empty")]
+    public required string PrivateKeyPem { get; set; }
+
+    [Required(ErrorMessage = "PublicKeyPem is required")]
+    [StringLength(int.MaxValue, MinimumLength = 1, ErrorMessage = "PublicKeyPem cannot be empty")]
+    public required string PublicKeyPem { get; set; }
+
+    [Required(ErrorMessage = "Issuer is required")]
+    [StringLength(int.MaxValue, MinimumLength = 1, ErrorMessage = "Issuer cannot be empty")]
     public required string Issuer { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Audience is required")]
+    [StringLength(int.MaxValue, MinimumLength = 1, ErrorMessage = "Audience cannot be empty")]
     public required string Audience { get; set; }
 
-    [Range(1, 1440, ErrorMessage = "ExpirationMinutes must be between 1 and 1440.")]
-    public required int ExpirationMinutes { get; set; } = 30;
+    [Required(ErrorMessage = "ExpirationMinutes is required")]
+    [Range(1, int.MaxValue, ErrorMessage = "ExpirationMinutes must be greater than 0")]
+    public required int ExpirationMinutes { get; set; }
 
-    [Required]
-    public required RefreshTokenOptions RefreshToken { get; set; } = new();
+    [Required(ErrorMessage = "RefreshToken configuration is required")]
+    public required RefreshTokenOptions RefreshToken { get; set; }
 }
 
 public class RefreshTokenOptions
 {
-    [Range(1, 365, ErrorMessage = "ExpirationDays must be between 1 and 365.")]
-    public int ExpirationDays { get; set; } = 30;
+    [Required(ErrorMessage = "ExpirationDays is required")]
+    [Range(1, int.MaxValue, ErrorMessage = "ExpirationDays must be greater than 0")]
+    public required int ExpirationDays { get; set; }
 }

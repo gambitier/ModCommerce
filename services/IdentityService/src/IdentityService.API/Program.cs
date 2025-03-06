@@ -21,13 +21,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<CustomAspNetCoreResultEndpointProfile>();
 builder.Services.AddControllers();
 
-builder.Services.AddInfrastructure(options =>
+builder.Services.AddInfrastructure(builder.Configuration, options =>
 {
-    options.DatabaseOptions = builder.Configuration.GetDatabaseOptions();
     options.RepositoryLifetime = ServiceLifetime.Scoped;
     options.AuthenticationServicesLifetime = ServiceLifetime.Scoped;
-    options.JwtOptions = builder.Configuration.GetJwtOptions();
-    options.EmailOptions = builder.Configuration.GetEmailOptions();
 });
 builder.Services.AddApplication(options =>
 {
