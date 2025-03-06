@@ -123,7 +123,7 @@ public class AuthenticationService : IAuthenticationService
         return Result.Ok();
     }
 
-    public JsonWebKeyInfo[] GetJsonWebKeys()
+    public JsonWebKey[] GetJsonWebKeys()
     {
         return _tokenService.GetJsonWebKeys();
     }

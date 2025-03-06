@@ -51,12 +51,12 @@ public sealed class JwtKeyManagerService : IJwtKeyManagerService
         };
     }
 
-    public IEnumerable<JsonWebKeyInfo> GetJsonWebKeys()
+    public IEnumerable<Domain.Models.JsonWebKey> GetJsonWebKeys()
     {
         return _publicKeys.Select(kvp =>
         {
             var rsa = kvp.Value;
-            var jwk = new JsonWebKey
+            var jwk = new Microsoft.IdentityModel.Tokens.JsonWebKey
             {
                 Kty = JsonWebAlgorithmsKeyTypes.RSA,
                 Kid = kvp.Key,
@@ -66,15 +66,14 @@ public sealed class JwtKeyManagerService : IJwtKeyManagerService
                 E = Base64UrlEncoder.Encode(rsa.ExportParameters(false).Exponent)
             };
 
-            return new JsonWebKeyInfo
-            {
-                Kty = jwk.Kty,
-                Kid = jwk.Kid,
-                Use = jwk.Use!,
-                Alg = jwk.Alg,
-                N = jwk.N,
-                E = jwk.E
-            };
+            return new Domain.Models.JsonWebKey(
+                Kty: jwk.Kty,
+                Kid: jwk.Kid,
+                Use: jwk.Use!,
+                Alg: jwk.Alg,
+                N: jwk.N,
+                E: jwk.E
+            );
         });
     }
 }

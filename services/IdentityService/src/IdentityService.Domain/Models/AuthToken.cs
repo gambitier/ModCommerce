@@ -2,7 +2,7 @@ using IdentityService.Domain.Constants;
 
 namespace IdentityService.Domain.Models;
 
-public record AuthTokenInfo(
+public record AuthToken(
     string AccessToken,
     TokenType TokenType,
     int ExpiresIn,
