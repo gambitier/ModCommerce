@@ -5,6 +5,7 @@ namespace IdentityService.Domain.Interfaces.AuthenticationServices;
 
 public interface ITokenService
 {
-    Task<Result<AuthTokenInfo>> GenerateToken(string userId, string email);
-    Task<Result<AuthTokenInfo>> RefreshToken(string refreshToken);
+    Task<Result<AuthToken>> GenerateToken(string userId, string email);
+    Task<Result<AuthToken>> RefreshToken(string refreshToken);
+    JsonWebKey[] GetJsonWebKeys();
 }

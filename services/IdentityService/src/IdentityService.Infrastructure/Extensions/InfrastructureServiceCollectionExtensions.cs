@@ -6,14 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using IdentityService.Infrastructure.Authentication.Options;
 using IdentityService.Domain.Interfaces.Persistence;
-using IdentityService.Infrastructure.Communication.Options;
 using IdentityService.Domain.Interfaces.Communication;
 using IdentityService.Infrastructure.Communication;
 using IdentityService.Infrastructure.Authentication.Services;
+using Microsoft.Extensions.Configuration;
+using IdentityService.Infrastructure.Authentication.Interfaces;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -27,22 +30,16 @@ public static class InfrastructureServiceCollectionExtensions
 
     public class InfrastructureOptions
     {
-        /// <summary>
-        /// Database configuration options required for setting up the infrastructure.
-        /// The null! annotation indicates this property must be set during initialization,
-        /// even though it's initially null. This is validated using the Required attribute.
-        /// </summary>
-        [Required(ErrorMessage = "DatabaseOptions must be configured when calling AddInfrastructure")]
-        public DatabaseOptions DatabaseOptions { get; set; } = null!;
-
-        [Required(ErrorMessage = "JwtOptions must be configured when calling AddInfrastructure")]
-        public JwtOptions JwtOptions { get; set; } = null!;
-
-        [Required(ErrorMessage = "EmailOptions must be configured when calling AddInfrastructure")]
-        public EmailOptions EmailOptions { get; set; } = null!;
-
         public ServiceLifetime RepositoryLifetime { get; set; } = ServiceLifetime.Scoped;
         public ServiceLifetime AuthenticationServicesLifetime { get; set; } = ServiceLifetime.Scoped;
+
+        /// <summary>
+        /// Configuration sections defined in appsettings.json for the infrastructure services.
+        /// - The null! annotation indicates this property must be set during initialization,
+        /// even though it's initially null. This is validated using the Required attribute.
+        /// </summary>
+        [Required(ErrorMessage = "Infrastructure configuration sections are required")]
+        public InfrastructureConfigurationSections InfraConfigSections { get; set; } = null!;
     }
 
     /// <summary>
@@ -54,20 +51,24 @@ public static class InfrastructureServiceCollectionExtensions
     /// <returns>The service collection with the infrastructure services added.</returns>
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
+        IConfiguration configuration,
         Action<InfrastructureOptions> configureOptions)
     {
         var options = new InfrastructureOptions();
         configureOptions(options);
 
         // Validate options using Data Annotations
-        Validator.ValidateObject(options, new ValidationContext(options), validateAllProperties: true);
+        Validator.ValidateObject(
+            options,
+            new ValidationContext(options),
+            validateAllProperties: true);
 
-        services.AddDbContext(options.DatabaseOptions);
+        services.AddDbContext();
         services.AddIdentity();
         services.AddUnitOfWork();
         services.AddRepositories(options.RepositoryLifetime);
         services.AddAuthenticationServices(options.AuthenticationServicesLifetime);
-        services.AddJwtAuthentication(options.JwtOptions);
+        services.AddJwtAuthentication(configuration.GetOptions<JwtOptions>(options.InfraConfigSections.JwtSection));
         services.AddAuthorizationServices();
         services.AddEmailService();
 
@@ -80,10 +81,13 @@ public static class InfrastructureServiceCollectionExtensions
     /// <param name="services">The service collection to add the DbContext to.</param>
     /// <param name="databaseOptions">The database options.</param>
     /// <returns>The service collection with the DbContext added.</returns>
-    private static IServiceCollection AddDbContext(this IServiceCollection services, DatabaseOptions databaseOptions)
+    private static IServiceCollection AddDbContext(this IServiceCollection services)
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(databaseOptions.ConnectionString));
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
+            var dbOptions = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            options.UseNpgsql(dbOptions.ConnectionString);
+        });
 
         return services;
     }
@@ -138,18 +142,50 @@ public static class InfrastructureServiceCollectionExtensions
             })
             .AddJwtBearer(options =>
             {
+                var serviceProvider = services.BuildServiceProvider();
+                var keyManager = serviceProvider.GetRequiredService<IJwtKeyManagerService>();
+                var logger = serviceProvider.GetRequiredService<ILogger<JwtBearerEvents>>();
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidateIssuer = true,
                     ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
                     ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions.Secret)
-                    ),
-                    ClockSkew = TimeSpan.Zero
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                    {
+                        if (string.IsNullOrEmpty(kid))
+                        {
+                            // this condition should never happen with properly signed tokens
+                            logger.LogWarning("Received token without kid");
+                            return []; // Reject tokens without kid
+                        }
+
+                        try
+                        {
+                            var publicKey = keyManager.GetPublicKey(kid);
+                            logger.LogInformation("Using key with kid: {Kid}", kid);
+                            return [new RsaSecurityKey(publicKey) { KeyId = kid }];
+                        }
+                        catch
+                        {
+                            logger.LogError("Invalid key identifier: {Kid}", kid);
+                            return [];
+                        }
+                    }
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        // Optional: Keep logging in OnTokenValidated for debugging
+                        logger.LogInformation("Token validated successfully");
+                        return Task.CompletedTask;
+                    }
                 };
             });
     }
@@ -166,7 +202,7 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the Authentication services.
+    /// Registers the Authentication related services.
     /// </summary>
     /// <param name="services">The service collection to add the Authentication services to.</param>
     /// <param name="lifetime">The lifetime of the Authentication services.</param>
@@ -194,6 +230,9 @@ public static class InfrastructureServiceCollectionExtensions
 
             services.Add(new ServiceDescriptor(interfaceType, implementation, lifetime));
         }
+
+        // IJwtKeyManagerService service stays as only usable within the Infrastructure project
+        services.AddSingleton<IJwtKeyManagerService, JwtKeyManagerService>();
 
         return services;
     }

@@ -1,5 +1,6 @@
 using IdentityService.Application.Models;
 using FluentResults;
+using IdentityService.Domain.Models;
 namespace IdentityService.Application.Interfaces.Services;
 
 public interface IAuthenticationService
@@ -9,4 +10,5 @@ public interface IAuthenticationService
     Task<Result<AuthResultDto>> RefreshTokenAsync(string refreshToken);
     Task<Result<AuthResultDto>> ConfirmEmailAsync(string email, string token);
     Task<Result> SendConfirmationEmailAsync(string email);
+    JsonWebKey[] GetJsonWebKeys();
 }

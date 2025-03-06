@@ -1,8 +1,6 @@
-using IdentityService.Infrastructure.Persistence.Options;
 using IdentityService.API.Constants;
-using IdentityService.Infrastructure.Authentication.Options;
-using IdentityService.Infrastructure.Communication.Options;
 using IdentityService.Application.Options;
+using IdentityService.Infrastructure.Extensions;
 
 namespace IdentityService.API.Extensions;
 
@@ -16,56 +14,35 @@ public static class OptionsExtensions
     /// <summary>
     /// Add options to the service collection.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configuration"></param>
-    public static void AddOptions(this IServiceCollection services, IConfiguration configuration)
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <param name="infrastructureSections">The infrastructure sections.</param>
+    public static void AddOptions(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        InfrastructureConfigurationSections infrastructureSections)
     {
-        services
-            .AddOptions<JwtOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.JwtSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddInfrastructureOptions(configuration, infrastructureSections);
 
-        services
-            .AddOptions<DatabaseOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.DatabaseSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services
-            .AddOptions<EmailOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.EmailSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
+        // Add application-specific options
         services
             .AddOptions<ApplicationUrlOptions>()
             .Bind(configuration.GetSection(ConfigurationConstants.ApplicationSection))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-
-        services
-            .AddOptions<EmailConfirmationTokenProviderOptions>()
-            .Bind(configuration.GetSection(ConfigurationConstants.EmailConfirmationSection))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
     }
 
-    public static JwtOptions GetJwtOptions(this IConfiguration configuration)
+    /// <summary>
+    /// Convenience method to get options from the configuration.
+    /// </summary>
+    /// <typeparam name="T">The type of the options.</typeparam>
+    /// <param name="configuration">The configuration.</param>
+    /// <param name="section">The section of the options.</param>
+    /// <returns>The options.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the options are not configured.</exception>
+    public static T GetOptions<T>(this IConfiguration configuration, string section) where T : class
     {
-        return configuration.GetSection(ConfigurationConstants.JwtSection).Get<JwtOptions>()
-            ?? throw new InvalidOperationException("JWT options are not configured");
-    }
-
-    public static DatabaseOptions GetDatabaseOptions(this IConfiguration configuration)
-    {
-        return configuration.GetSection(ConfigurationConstants.DatabaseSection).Get<DatabaseOptions>()
-            ?? throw new InvalidOperationException("Database options are not configured");
-    }
-
-    public static EmailOptions GetEmailOptions(this IConfiguration configuration)
-    {
-        return configuration.GetSection(ConfigurationConstants.EmailSection).Get<EmailOptions>()
-            ?? throw new InvalidOperationException("Email options are not configured");
+        return configuration.GetSection(section).Get<T>()
+            ?? throw new InvalidOperationException($"{section} are not configured");
     }
 }
