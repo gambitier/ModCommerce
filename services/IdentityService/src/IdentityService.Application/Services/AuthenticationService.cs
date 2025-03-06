@@ -9,6 +9,7 @@ using IdentityService.Domain.Errors;
 using Microsoft.Extensions.Options;
 using IdentityService.Application.Options;
 using IdentityService.Domain.Interfaces.Persistence;
+using IdentityService.Domain.Models;
 
 namespace IdentityService.Application.Services;
 
@@ -120,5 +121,10 @@ public class AuthenticationService : IAuthenticationService
         await _emailService.SendConfirmationEmailAsync(userResult.Value.Email, userResult.Value.Username, confirmationLink.ToString());
 
         return Result.Ok();
+    }
+
+    public JsonWebKeyInfo GetJsonWebKey()
+    {
+        return _tokenService.GetJsonWebKey();
     }
 }

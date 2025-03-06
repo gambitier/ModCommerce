@@ -1,6 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using System.Security.Cryptography;
 using IdentityService.Infrastructure.Authentication.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
@@ -10,6 +10,7 @@ using IdentityService.Domain.Models;
 using IdentityService.Domain.Interfaces.Repositories;
 using FluentResults;
 using IdentityService.Domain.Interfaces.Persistence;
+
 namespace IdentityService.Infrastructure.Authentication.Services;
 
 public class TokenService : ITokenService
@@ -18,6 +19,8 @@ public class TokenService : ITokenService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly RsaSecurityKey _privateKey;
+    private readonly RsaSecurityKey _publicKey;
 
     public TokenService(
         IOptions<JwtOptions> jwtOptions,
@@ -29,6 +32,17 @@ public class TokenService : ITokenService
         _refreshTokenRepository = refreshTokenRepository;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+
+        // Initialize RSA keys
+        using var privateRsa = RSA.Create();
+        privateRsa.ImportFromPem(_jwtOptions.PrivateKeyPem);
+        _privateKey = new RsaSecurityKey(privateRsa.ExportParameters(true));
+        _privateKey.KeyId = _jwtOptions.KeyId;
+
+        using var publicRsa = RSA.Create();
+        publicRsa.ImportFromPem(_jwtOptions.PublicKeyPem);
+        _publicKey = new RsaSecurityKey(publicRsa.ExportParameters(false));
+        _publicKey.KeyId = _jwtOptions.KeyId;
     }
 
     public async Task<Result<AuthTokenInfo>> GenerateToken(string userId, string email)
@@ -89,11 +103,11 @@ public class TokenService : ITokenService
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("kid", _jwtOptions.KeyId)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256);
         var jwt = new JwtSecurityToken(
             issuer: _jwtOptions.Issuer,
             audience: _jwtOptions.Audience,
@@ -103,5 +117,28 @@ public class TokenService : ITokenService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(jwt);
+    }
+
+    public JsonWebKeyInfo GetJsonWebKey()
+    {
+        var jwk = new JsonWebKey
+        {
+            Kty = JsonWebAlgorithmsKeyTypes.RSA,
+            Kid = _jwtOptions.KeyId,
+            Use = "sig",
+            Alg = SecurityAlgorithms.RsaSha256,
+            N = Base64UrlEncoder.Encode(_publicKey.Parameters.Modulus),
+            E = Base64UrlEncoder.Encode(_publicKey.Parameters.Exponent)
+        };
+
+        return new JsonWebKeyInfo
+        {
+            Kty = jwk.Kty,
+            Kid = jwk.Kid,
+            Use = jwk.Use!,
+            Alg = jwk.Alg,
+            N = jwk.N,
+            E = jwk.E
+        };
     }
 }
