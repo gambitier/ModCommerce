@@ -40,7 +40,7 @@ public interface IJwtKeyManagerService
     /// <summary>
     /// Gets the JSON Web Key information for all keys.
     /// </summary>
-    IEnumerable<JsonWebKeyInfo> GetJsonWebKeys();
+    IEnumerable<Domain.Models.JsonWebKey> GetJsonWebKeys();
 
     /// <summary>
     /// Gets a public key by its ID.

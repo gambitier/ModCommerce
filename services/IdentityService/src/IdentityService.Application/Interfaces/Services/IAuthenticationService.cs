@@ -10,5 +10,5 @@ public interface IAuthenticationService
     Task<Result<AuthResultDto>> RefreshTokenAsync(string refreshToken);
     Task<Result<AuthResultDto>> ConfirmEmailAsync(string email, string token);
     Task<Result> SendConfirmationEmailAsync(string email);
-    JsonWebKeyInfo[] GetJsonWebKeys();
+    JsonWebKey[] GetJsonWebKeys();
 }

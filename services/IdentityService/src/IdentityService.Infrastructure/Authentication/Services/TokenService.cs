@@ -35,18 +35,18 @@ public class TokenService : ITokenService
         _keyManager = keyManager;
     }
 
-    public async Task<Result<AuthTokenInfo>> GenerateToken(string userId, string email)
+    public async Task<Result<AuthToken>> GenerateToken(string userId, string email)
     {
         var refreshTokenResult = await _refreshTokenRepository.CreateAsync(
             userId,
             TimeSpan.FromDays(_jwtOptions.RefreshToken.ExpirationDays)
         );
         if (refreshTokenResult.IsFailed)
-            return refreshTokenResult.ToResult<AuthTokenInfo>();
+            return refreshTokenResult.ToResult<AuthToken>();
 
         await _unitOfWork.SaveChangesAsync();
 
-        return Result.Ok(new AuthTokenInfo(
+        return Result.Ok(new AuthToken(
             AccessToken: GenerateAccessToken(userId, email),
             TokenType: TokenType.Bearer,
             ExpiresIn: _jwtOptions.ExpirationMinutes * 60,
@@ -55,30 +55,30 @@ public class TokenService : ITokenService
         ));
     }
 
-    public async Task<Result<AuthTokenInfo>> RefreshToken(string refreshToken)
+    public async Task<Result<AuthToken>> RefreshToken(string refreshToken)
     {
         var tokenResult = await _refreshTokenRepository.FindByTokenAsync(refreshToken);
         if (tokenResult.IsFailed)
-            return tokenResult.ToResult<AuthTokenInfo>();
+            return tokenResult.ToResult<AuthToken>();
 
         var userResult = await _userRepository.FindByIdAsync(tokenResult.Value.UserId);
         if (userResult.IsFailed)
-            return userResult.ToResult<AuthTokenInfo>();
+            return userResult.ToResult<AuthToken>();
 
         var revokeResult = await _refreshTokenRepository.RevokeAsync(refreshToken);
         if (revokeResult.IsFailed)
-            return revokeResult.ToResult<AuthTokenInfo>();
+            return revokeResult.ToResult<AuthToken>();
 
         var newTokenResult = await _refreshTokenRepository.CreateAsync(
             tokenResult.Value.UserId,
             TimeSpan.FromDays(_jwtOptions.RefreshToken.ExpirationDays)
         );
         if (newTokenResult.IsFailed)
-            return newTokenResult.ToResult<AuthTokenInfo>();
+            return newTokenResult.ToResult<AuthToken>();
 
         await _unitOfWork.SaveChangesAsync();
 
-        return Result.Ok(new AuthTokenInfo(
+        return Result.Ok(new AuthToken(
             AccessToken: GenerateAccessToken(userResult.Value.Id, userResult.Value.Email),
             TokenType: TokenType.Bearer,
             ExpiresIn: _jwtOptions.ExpirationMinutes * 60,
@@ -109,7 +109,7 @@ public class TokenService : ITokenService
         return new JwtSecurityTokenHandler().WriteToken(jwt);
     }
 
-    public JsonWebKeyInfo[] GetJsonWebKeys()
+    public Domain.Models.JsonWebKey[] GetJsonWebKeys()
     {
         return _keyManager.GetJsonWebKeys().ToArray();
     }
