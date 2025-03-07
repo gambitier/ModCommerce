@@ -9,10 +9,15 @@ using Mapster;
 using System.Reflection;
 using UserService.Application.Mapping;
 using UserService.API.Mapping;
+using UserService.API.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 //add and validate options at startup
-builder.Services.AddOptions(builder.Configuration);
+var infraConfigSections = new InfrastructureConfigurationSections
+{
+    JwtSection = ConfigurationConstants.JwtSection,
+};
+builder.Services.AddOptions(builder.Configuration, infraConfigSections);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
@@ -21,8 +26,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<CustomAspNetCoreResultEndpointProfile>();
 builder.Services.AddControllers();
 
-builder.Services.AddInfrastructure(options =>
+builder.Services.AddInfrastructure(builder.Configuration, options =>
 {
+    options.InfraConfigSections = infraConfigSections;
 });
 
 builder.Services.AddApplication(options =>

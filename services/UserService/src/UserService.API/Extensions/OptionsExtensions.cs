@@ -1,3 +1,5 @@
+using UserService.Infrastructure.Extensions;
+
 namespace UserService.API.Extensions;
 
 /// <summary>
@@ -12,8 +14,12 @@ public static class OptionsExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
-    public static void AddOptions(this IServiceCollection services, IConfiguration configuration)
+    /// <param name="infraConfigSections"></param>
+    public static void AddOptions(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        InfrastructureConfigurationSections infraConfigSections)
     {
-        // TODO: Add options
+        services.AddInfrastructureOptions(configuration, infraConfigSections);
     }
 }

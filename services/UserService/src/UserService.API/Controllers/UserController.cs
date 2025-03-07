@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UserService.API.Controllers
 {
-    [Route("api/users")]
+    [Authorize]
     [ApiController]
+    [Route("api/users")]
     public class UserController : ControllerBase
     {
         [HttpGet]
