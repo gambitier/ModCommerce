@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using UserService.Infrastructure.Authentication.Options;
 using Microsoft.Extensions.Configuration;
 using UserService.Infrastructure.Authentication.Services;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Logging;
 
 namespace UserService.Infrastructure.Extensions;
 
@@ -87,7 +89,58 @@ public static class InfrastructureServiceCollectionExtensions
     {
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer();
+            .AddJwtBearer(options =>
+            {
+                options.MapInboundClaims = false;
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = async context =>
+                    {
+                        var authHeader = context.Request.Headers.Authorization.ToString();
+                        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                        {
+                            context.Fail("Missing or invalid Authorization header");
+                            return;
+                        }
+
+                        // Extract token from "Bearer <token>"
+                        var token = authHeader.Substring("Bearer ".Length).Trim();
+                        if (string.IsNullOrEmpty(token))
+                        {
+                            context.Fail("No token present in the request");
+                            return;
+                        }
+
+                        try
+                        {
+                            var handler = new JwtSecurityTokenHandler();
+                            var jwtToken = handler.ReadJwtToken(token);
+                            var kid = jwtToken.Header.Kid;
+
+                            if (string.IsNullOrEmpty(kid))
+                            {
+                                context.Fail("No 'kid' header present in token");
+                                return;
+                            }
+
+                            var jwksManager = context.HttpContext.RequestServices.GetRequiredService<IJwksManager>();
+                            var key = await jwksManager.GetPublicKey(kid);
+                            if (key == null)
+                            {
+                                context.Fail($"Unable to find a signing key that matches the 'kid' {kid}");
+                                return;
+                            }
+
+                            options.TokenValidationParameters.IssuerSigningKey = new RsaSecurityKey(key) { KeyId = kid };
+                            context.Token = token;  // Set the token for further processing
+                        }
+                        catch (Exception ex)
+                        {
+                            context.Fail($"Error processing token: {ex.Message}");
+                        }
+                    }
+                };
+            });
 
         services.ConfigureOptions<ConfigureJwtBearerOptions>();
 
@@ -97,12 +150,10 @@ public static class InfrastructureServiceCollectionExtensions
     private class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
     {
         private readonly JwtOptions _jwtOptions;
-        private readonly IJwksManager _jwksManager;
 
-        public ConfigureJwtBearerOptions(IOptions<JwtOptions> options, IJwksManager jwksManager)
+        public ConfigureJwtBearerOptions(IOptions<JwtOptions> options)
         {
             _jwtOptions = options.Value;
-            _jwksManager = jwksManager;
         }
 
         public void Configure(string? name, JwtBearerOptions options)
@@ -119,19 +170,7 @@ public static class InfrastructureServiceCollectionExtensions
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidIssuer = _jwtOptions.ValidIssuer,
-                ValidAudience = _jwtOptions.ValidAudience,
-                IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
-                {
-                    if (string.IsNullOrEmpty(kid))
-                    {
-                        return [];
-                    }
-
-                    var publicKey = _jwksManager.GetPublicKey(kid).GetAwaiter().GetResult();
-                    return publicKey != null
-                        ? new[] { new RsaSecurityKey(publicKey) { KeyId = kid } }
-                        : [];
-                }
+                ValidAudience = _jwtOptions.ValidAudience
             };
         }
     }
