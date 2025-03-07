@@ -89,58 +89,7 @@ public static class InfrastructureServiceCollectionExtensions
     {
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.MapInboundClaims = false;
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = async context =>
-                    {
-                        var authHeader = context.Request.Headers.Authorization.ToString();
-                        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-                        {
-                            context.Fail("Missing or invalid Authorization header");
-                            return;
-                        }
-
-                        // Extract token from "Bearer <token>"
-                        var token = authHeader.Substring("Bearer ".Length).Trim();
-                        if (string.IsNullOrEmpty(token))
-                        {
-                            context.Fail("No token present in the request");
-                            return;
-                        }
-
-                        try
-                        {
-                            var handler = new JwtSecurityTokenHandler();
-                            var jwtToken = handler.ReadJwtToken(token);
-                            var kid = jwtToken.Header.Kid;
-
-                            if (string.IsNullOrEmpty(kid))
-                            {
-                                context.Fail("No 'kid' header present in token");
-                                return;
-                            }
-
-                            var jwksManager = context.HttpContext.RequestServices.GetRequiredService<IJwksManager>();
-                            var key = await jwksManager.GetPublicKey(kid);
-                            if (key == null)
-                            {
-                                context.Fail($"Unable to find a signing key that matches the 'kid' {kid}");
-                                return;
-                            }
-
-                            options.TokenValidationParameters.IssuerSigningKey = new RsaSecurityKey(key) { KeyId = kid };
-                            context.Token = token;  // Set the token for further processing
-                        }
-                        catch (Exception ex)
-                        {
-                            context.Fail($"Error processing token: {ex.Message}");
-                        }
-                    }
-                };
-            });
+            .AddJwtBearer();
 
         services.ConfigureOptions<ConfigureJwtBearerOptions>();
 
@@ -164,6 +113,8 @@ public static class InfrastructureServiceCollectionExtensions
         public void Configure(JwtBearerOptions options)
         {
             options.Authority = _jwtOptions.Authority;
+            options.MapInboundClaims = false;
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -171,6 +122,55 @@ public static class InfrastructureServiceCollectionExtensions
                 ValidateAudience = true,
                 ValidIssuer = _jwtOptions.ValidIssuer,
                 ValidAudience = _jwtOptions.ValidAudience
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = async context =>
+                {
+                    var authHeader = context.Request.Headers.Authorization.ToString();
+                    if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                    {
+                        context.Fail("Missing or invalid Authorization header");
+                        return;
+                    }
+
+                    // Extract token from "Bearer <token>"
+                    var token = authHeader.Substring("Bearer ".Length).Trim();
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        context.Fail("No token present in the request");
+                        return;
+                    }
+
+                    try
+                    {
+                        var handler = new JwtSecurityTokenHandler();
+                        var jwtToken = handler.ReadJwtToken(token);
+                        var kid = jwtToken.Header.Kid;
+
+                        if (string.IsNullOrEmpty(kid))
+                        {
+                            context.Fail("No 'kid' header present in token");
+                            return;
+                        }
+
+                        var jwksManager = context.HttpContext.RequestServices.GetRequiredService<IJwksManager>();
+                        var key = await jwksManager.GetPublicKey(kid);
+                        if (key == null)
+                        {
+                            context.Fail($"Unable to find a signing key that matches the 'kid' {kid}");
+                            return;
+                        }
+
+                        options.TokenValidationParameters.IssuerSigningKey = new RsaSecurityKey(key) { KeyId = kid };
+                        context.Token = token;  // Set the token for further processing
+                    }
+                    catch (Exception ex)
+                    {
+                        context.Fail($"Error processing token: {ex.Message}");
+                    }
+                }
             };
         }
     }
