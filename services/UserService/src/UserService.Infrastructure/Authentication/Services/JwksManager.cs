@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Linq;
 
 namespace UserService.Infrastructure.Authentication.Services;
 
