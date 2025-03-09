@@ -13,6 +13,7 @@ public record InfrastructureConfigurationSections
     public required string DatabaseSection { get; init; }
     public required string EmailSection { get; init; }
     public required string EmailConfirmationSection { get; init; }
+    public required string RabbitMQSection { get; init; }
 }
 
 public static class InfrastructureOptionsExtensions
@@ -55,6 +56,10 @@ public static class InfrastructureOptionsExtensions
         services.ConfigureOptions<EmailConfirmationTokenProviderOptions>(
             configuration,
             sections.EmailConfirmationSection);
+
+        services.ConfigureOptions<RabbitMQOptions>(
+            configuration,
+            sections.RabbitMQSection);
 
         return services;
     }

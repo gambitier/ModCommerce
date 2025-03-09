@@ -22,5 +22,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         base.OnModelCreating(builder);
 
         builder.ApplyConfiguration(new RefreshTokenConfiguration());
+        builder.ApplyConfiguration(new IdentityUserConfiguration());
     }
 }
