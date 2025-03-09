@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace IdentityService.API.Contracts.Auth;
+namespace IdentityService.Contracts.API.Auth.Requests;
 
 public class TokenRequest
 {

@@ -1,4 +1,4 @@
-namespace IdentityService.API.Contracts.Auth;
+namespace IdentityService.Contracts.API.Auth.Responses;
 
 /// <summary>
 /// OAuth 2.0 Authorization Response

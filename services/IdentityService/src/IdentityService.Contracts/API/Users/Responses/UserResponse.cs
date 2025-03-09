@@ -1,4 +1,4 @@
-namespace IdentityService.API.Contracts.Users;
+namespace IdentityService.Contracts.API.Users.Responses;
 
 public class UserResponse
 {
