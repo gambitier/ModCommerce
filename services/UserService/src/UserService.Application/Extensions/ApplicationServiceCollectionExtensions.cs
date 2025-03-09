@@ -19,7 +19,7 @@ public class ApplicationOptions
 public static class ApplicationServiceCollectionExtensions
 {
     private const string ApplicationServicesNamespace = "UserService.Application.Services";
-    private const string ApplicationServicesInterfacesNamespace = "UserService.Application.Interfaces.Services";
+    private const string ApplicationServicesInterfacesNamespace = "UserService.Domain.Interfaces.Services";
 
     /// <summary>
     /// Registers the application layer services.
@@ -59,7 +59,10 @@ public static class ApplicationServiceCollectionExtensions
         var applicationAssembly = Assembly.Load("UserService.Application")
             ?? throw new InvalidOperationException("Could not find Application assembly");
 
-        var serviceInterfaces = applicationAssembly.GetTypes()
+        var domainAssembly = Assembly.Load("UserService.Domain")
+            ?? throw new InvalidOperationException("Could not find Domain assembly");
+
+        var serviceInterfaces = domainAssembly.GetTypes()
             .Where(t => t.IsInterface && t.Namespace?.StartsWith(ApplicationServicesInterfacesNamespace) == true)
             .ToList();
 

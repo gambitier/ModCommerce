@@ -16,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 var infraConfigSections = new InfrastructureConfigurationSections
 {
     JwtSection = ConfigurationConstants.JwtSection,
+    DatabaseSection = ConfigurationConstants.DatabaseSection,
+    RabbitMQSection = ConfigurationConstants.RabbitMQSection,
 };
 builder.Services.AddOptions(builder.Configuration, infraConfigSections);
 
@@ -29,6 +31,7 @@ builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration, options =>
 {
     options.InfraConfigSections = infraConfigSections;
+    options.RepositoryLifetime = ServiceLifetime.Scoped;
 });
 
 builder.Services.AddApplication(options =>
