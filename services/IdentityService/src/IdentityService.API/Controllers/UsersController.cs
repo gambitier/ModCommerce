@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using IdentityService.API.Contracts.Users;
+using IdentityService.Contracts.API.Users.Responses;
 using IdentityService.Application.Interfaces.Services;
 using System.Security.Claims;
 using FluentResults.Extensions.AspNetCore;

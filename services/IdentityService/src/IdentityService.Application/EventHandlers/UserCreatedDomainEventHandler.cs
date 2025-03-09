@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using IdentityService.Domain.Events;
 using IdentityService.Application.Interfaces.Services;
 using MassTransit;
+using IdentityService.Contracts.Events.Users;
 
 public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDomainEvent>
 {
@@ -39,7 +40,12 @@ public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDom
                 "Successfully sent confirmation email to {Email}",
                 notification.Email);
 
-            await _publishEndpoint.Publish(notification, cancellationToken);
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+                notification.UserId,
+                notification.Email,
+                notification.Username,
+                notification.CreatedAt
+            ), cancellationToken);
 
             _logger.LogInformation(
                 "Successfully published user created event for user email: {Email}",

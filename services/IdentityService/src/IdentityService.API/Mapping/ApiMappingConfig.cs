@@ -1,5 +1,6 @@
-using IdentityService.API.Contracts.Auth;
-using IdentityService.API.Contracts.Users;
+using IdentityService.Contracts.API.Auth.Requests;
+using IdentityService.Contracts.API.Auth.Responses;
+using IdentityService.Contracts.API.Users.Responses;
 using IdentityService.Application.Models;
 using IdentityService.Application.Models.Users;
 using Mapster;

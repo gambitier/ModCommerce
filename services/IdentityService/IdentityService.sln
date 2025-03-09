@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.Domain", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.Infrastructure", "src\IdentityService.Infrastructure\IdentityService.Infrastructure.csproj", "{8198D74C-FD71-4846-89DE-6A0D51FE9584}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService.Contracts", "src\IdentityService.Contracts\IdentityService.Contracts.csproj", "{A800ECDE-12F8-433C-91A7-37D7C83E8E6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,11 +40,16 @@ Global
 		{8198D74C-FD71-4846-89DE-6A0D51FE9584}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8198D74C-FD71-4846-89DE-6A0D51FE9584}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8198D74C-FD71-4846-89DE-6A0D51FE9584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A800ECDE-12F8-433C-91A7-37D7C83E8E6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A800ECDE-12F8-433C-91A7-37D7C83E8E6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A800ECDE-12F8-433C-91A7-37D7C83E8E6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A800ECDE-12F8-433C-91A7-37D7C83E8E6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7B99C552-841A-473B-B33B-76F236C21E66} = {AC66B491-AB93-4C33-B16E-736A551B5686}
 		{8F7E95DB-9E19-44E5-9107-405B3FF206B9} = {AC66B491-AB93-4C33-B16E-736A551B5686}
 		{E0DC8B3A-AA60-4200-91BF-727A0E46DCFD} = {AC66B491-AB93-4C33-B16E-736A551B5686}
 		{8198D74C-FD71-4846-89DE-6A0D51FE9584} = {AC66B491-AB93-4C33-B16E-736A551B5686}
+		{A800ECDE-12F8-433C-91A7-37D7C83E8E6A} = {AC66B491-AB93-4C33-B16E-736A551B5686}
 	EndGlobalSection
 EndGlobal
