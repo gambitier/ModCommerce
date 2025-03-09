@@ -3,11 +3,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using UserService.Infrastructure.Authentication.Options;
+using UserService.Infrastructure.Communication.Options;
+using UserService.Infrastructure.Persistence.Options;
 namespace UserService.Infrastructure.Extensions;
 
 public record InfrastructureConfigurationSections
 {
     public required string JwtSection { get; init; }
+    public required string DatabaseSection { get; init; }
+    public required string RabbitMQSection { get; init; }
 }
 
 public static class InfrastructureOptionsExtensions
@@ -38,6 +42,14 @@ public static class InfrastructureOptionsExtensions
         services.ConfigureOptions<JwtOptions>(
             configuration,
             sections.JwtSection);
+
+        services.ConfigureOptions<DatabaseOptions>(
+            configuration,
+            sections.DatabaseSection);
+
+        services.ConfigureOptions<RabbitMQOptions>(
+            configuration,
+            sections.RabbitMQSection);
 
         return services;
     }
