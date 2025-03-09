@@ -73,7 +73,7 @@ public class JwksFetcher : IJwksFetcher
         _jwtOptions = jwtOptions.Value;
     }
 
-    private async Task<string> GetJwksUri()
+    private string GetJwksUri()
     {
         // TODO: use this when identity service has a discovery endpoint
         // if (!string.IsNullOrEmpty(_jwksUri))
@@ -97,7 +97,7 @@ public class JwksFetcher : IJwksFetcher
 
     public async Task<List<(string KeyId, RSA RSAKey)>> FetchJWKSKeys()
     {
-        var jwksUrl = await GetJwksUri();
+        var jwksUrl = GetJwksUri();
         var response = await _httpClient.GetStringAsync(jwksUrl);
         var jwks = JsonSerializer.Deserialize<JwksResponse>(response);
 
