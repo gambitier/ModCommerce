@@ -18,7 +18,8 @@ var infraConfigSections = new InfrastructureConfigurationSections
     JwtSection = ConfigurationConstants.JwtSection,
     DatabaseSection = ConfigurationConstants.DatabaseSection,
     EmailSection = ConfigurationConstants.EmailSection,
-    EmailConfirmationSection = ConfigurationConstants.EmailConfirmationSection
+    EmailConfirmationSection = ConfigurationConstants.EmailConfirmationSection,
+    RabbitMQSection = ConfigurationConstants.RabbitMQSection
 };
 builder.Services.AddOptions(builder.Configuration, infraConfigSections);
 

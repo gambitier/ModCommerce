@@ -5,6 +5,11 @@ namespace IdentityService.Infrastructure.Persistence.Entities;
 
 public class IdentityUser : Microsoft.AspNetCore.Identity.IdentityUser, IHasDomainEvents
 {
+    /// <summary>
+    /// The date and time the user was created.
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     private readonly List<object> _domainEvents = [];
     public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
 
@@ -24,9 +29,15 @@ public class IdentityUser : Microsoft.AspNetCore.Identity.IdentityUser, IHasDoma
         {
             UserName = username,
             Email = email,
+            CreatedAt = DateTime.UtcNow
         };
 
-        user.AddDomainEvent(new UserCreatedDomainEvent(user.Id, user.Email, user.UserName));
+        user.AddDomainEvent(new UserCreatedDomainEvent(
+            user.Id,
+            user.Email,
+            user.UserName,
+            user.CreatedAt
+        ));
 
         return user;
     }

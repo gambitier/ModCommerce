@@ -7,4 +7,5 @@ public static class ConfigurationConstants
     public const string EmailSection = "Email";
     public const string ApplicationSection = "IdentityService";
     public const string EmailConfirmationSection = "EmailConfirmation";
+    public const string RabbitMQSection = "RabbitMQ";
 }
