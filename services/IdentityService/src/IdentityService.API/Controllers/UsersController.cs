@@ -43,9 +43,8 @@ public class UsersController : ControllerBase
         if (result.IsFailed)
             return result.ToActionResult();
 
-        return Ok(new UsersResponse
-        {
-            Users = _mapper.Map<IEnumerable<UserResponse>>(result.Value)
-        });
+        return Ok(new UsersResponse(
+           Users: _mapper.Map<IEnumerable<UserResponse>>(result.Value)
+        ));
     }
 }
