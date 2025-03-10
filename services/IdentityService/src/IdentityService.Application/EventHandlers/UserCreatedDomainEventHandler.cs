@@ -40,12 +40,15 @@ public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDom
                 "Successfully sent confirmation email to {Email}",
                 notification.Email);
 
-            await _publishEndpoint.Publish(new UserCreatedEvent(
-                notification.UserId,
-                notification.Email,
-                notification.Username,
-                notification.CreatedAt
-            ), cancellationToken);
+            await _publishEndpoint.Publish(
+                new UserCreatedEvent(
+                    notification.UserId,
+                    notification.Email,
+                    notification.Username,
+                    notification.CreatedAt
+                ),
+                cancellationToken
+            );
 
             _logger.LogInformation(
                 "Successfully published user created event for user email: {Email}",

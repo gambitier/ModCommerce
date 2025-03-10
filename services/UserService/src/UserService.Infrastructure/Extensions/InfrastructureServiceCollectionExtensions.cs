@@ -13,6 +13,9 @@ using UserService.Infrastructure.Communication.Options;
 using System.Reflection;
 using UserService.Infrastructure.Persistence;
 using UserService.Infrastructure.Persistence.Options;
+using UserService.Infrastructure.MessageQueue.Constants.IdentityService;
+using UserService.Infrastructure.MessageQueue.Consumers.IdentityService;
+using Microsoft.Extensions.Logging;
 
 namespace UserService.Infrastructure.Extensions;
 
@@ -65,7 +68,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddRepositories(options.RepositoryLifetime);
 
         services.AddJwtAuthentication();
-        services.AddMassTransit();
+        services.AddMessageQueue();
         return services;
     }
 
@@ -189,49 +192,44 @@ public static class InfrastructureServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection to add the MassTransit to.</param>
     /// <returns>The service collection with the MassTransit added.</returns>
-    public static IServiceCollection AddMassTransit(this IServiceCollection services)
+    public static IServiceCollection AddMessageQueue(this IServiceCollection services)
     {
-        services.AddMassTransit(config =>
+        services.AddMassTransit(busConfig =>
         {
-            config.AddConsumers();
+            busConfig.SetKebabCaseEndpointNameFormatter();
+            // busConfig.AddConsumers(Assembly.GetExecutingAssembly());
+            busConfig.AddConsumer<UserCreatedEventConsumer>();
 
-            config.UsingRabbitMq((context, cfg) =>
+            busConfig.UsingRabbitMq((context, cfg) =>
             {
                 var options = context.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
+                var logger = context.GetRequiredService<ILogger<UserCreatedEventConsumer>>();
+
                 cfg.Host(options.Host, options.VirtualHost, h =>
                 {
                     h.Username(options.Username);
                     h.Password(options.Password);
                 });
 
+                // Configure the consumer endpoint
+                cfg.ReceiveEndpoint(EventConstants.UserCreatedEvent.Queue, e =>
+                {
+                    var exchangeName = EventConstants.UserCreatedEvent.Exchange;
+                    logger.LogInformation("Binding queue {QueueName} to exchange {ExchangeName}",
+                        EventConstants.UserCreatedEvent.Queue,
+                        exchangeName);
+
+                    e.UseMessageRetry(r => r.Intervals(100, 200, 500, 1000, 2000));
+                    // Bind the queue to the exchange
+                    e.Bind(exchangeName);
+                    e.ConfigureConsumer<UserCreatedEventConsumer>(context);
+                });
+
+                cfg.ConfigureEndpoints(context);
             });
         });
 
         return services;
-    }
-
-    private static void AddConsumers(this IBusRegistrationConfigurator config)
-    {
-        // register all consumers from all folders of UserService.Infrastructure.Consumers
-        var infraAssembly = Assembly.GetAssembly(typeof(InfrastructureServiceCollectionExtensions))
-            ?? throw new InvalidOperationException("Could not find Infrastructure assembly");
-
-        var consumerNamespace = "UserService.Infrastructure.Consumers";
-        var consumerTypes = infraAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract
-                && typeof(IConsumer).IsAssignableFrom(t) // ensures it's a valid MassTransit consumer
-                && t.Namespace?.StartsWith(consumerNamespace) == true)
-            .ToList();
-
-        if (consumerTypes.Count == 0)
-        {
-            throw new InvalidOperationException($"No consumers found in {consumerNamespace} namespace");
-        }
-
-        foreach (var consumerType in consumerTypes)
-        {
-            config.AddConsumer(consumerType);
-        }
     }
 
     private class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
