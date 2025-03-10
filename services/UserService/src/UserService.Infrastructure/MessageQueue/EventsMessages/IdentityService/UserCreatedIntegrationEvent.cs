@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using IdentityService.Contracts.Constants;
 using MassTransit;
+using UserService.Infrastructure.MessageQueue.Constants.IdentityService;
 
 namespace IdentityService.Contracts.Events.Users;
 

@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../UserService.Domain/UserService.Domain.csproj" />
-    <ProjectReference Include="../UserService.Contracts/UserService.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

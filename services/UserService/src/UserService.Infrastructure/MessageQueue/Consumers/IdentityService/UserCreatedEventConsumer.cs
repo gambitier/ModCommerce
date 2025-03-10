@@ -1,11 +1,10 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using UserService.Contracts.IntegrationEvents.Identity;
 using UserService.Domain.Interfaces.Services;
+using IdentityService.Contracts.Events.Users;
+namespace UserService.Infrastructure.MessageQueue.Consumers.IdentityService;
 
-namespace UserService.Infrastructure.Consumers.Identity;
-
-public class UserCreatedEventConsumer : IConsumer<UserCreatedIntegrationEvent>
+public class UserCreatedEventConsumer : IConsumer<UserCreatedEvent>
 {
     private readonly IUserProfileService _userProfileService;
     private readonly ILogger<UserCreatedEventConsumer> _logger;
@@ -18,7 +17,7 @@ public class UserCreatedEventConsumer : IConsumer<UserCreatedIntegrationEvent>
         _logger = logger;
     }
 
-    public async Task Consume(ConsumeContext<UserCreatedIntegrationEvent> context)
+    public async Task Consume(ConsumeContext<UserCreatedEvent> context)
     {
         try
         {
