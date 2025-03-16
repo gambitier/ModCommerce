@@ -314,6 +314,10 @@ public static class InfrastructureServiceCollectionExtensions
                     h.Password(options.Password);
                 });
 
+                cfg.ClearSerialization();
+                cfg.UseRawJsonSerializer();
+                cfg.UseRawJsonDeserializer();
+
                 cfg.ConfigureEndpoints(context);
             });
         });
