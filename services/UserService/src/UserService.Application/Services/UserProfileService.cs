@@ -1,4 +1,5 @@
 using UserService.Domain.Entities;
+using UserService.Domain.Interfaces.Persistence;
 using UserService.Domain.Interfaces.Repositories;
 using UserService.Domain.Interfaces.Services;
 
@@ -7,10 +8,13 @@ namespace UserService.Application.Services;
 public class UserProfileService : IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
-
-    public UserProfileService(IUserProfileRepository userProfileRepository)
+    private readonly IUnitOfWork _unitOfWork;
+    public UserProfileService(
+        IUserProfileRepository userProfileRepository,
+        IUnitOfWork unitOfWork)
     {
         _userProfileRepository = userProfileRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task CreateInitialProfileAsync(string userId, string email, string username, DateTime createdAt)
@@ -24,5 +28,11 @@ public class UserProfileService : IUserProfileService
 
         var profile = UserProfile.Create(userId, email, username, createdAt);
         await _userProfileRepository.AddAsync(profile);
+    }
+
+    public async Task ConfirmEmailAsync(string userId, string email, DateTime confirmedAt)
+    {
+        await _userProfileRepository.ConfirmEmailAsync(email);
+        await _unitOfWork.SaveChangesAsync();
     }
 }

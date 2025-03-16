@@ -81,13 +81,15 @@ public class AuthenticationService : IAuthenticationService
         return Result.Ok(_mapper.Map<AuthResultDto>(result.Value));
     }
 
-    public async Task<Result<AuthResultDto>> ConfirmEmailAsync(string email, string token)
+    public async Task<Result> ConfirmEmailAsync(string email, string token)
     {
         var result = await _userRepository.ConfirmEmailAsync(email, token);
         if (result.IsFailed)
-            return result.ToResult<AuthResultDto>();
+            return result;
 
-        return Result.Ok(_mapper.Map<AuthResultDto>(result.Value));
+        await _unitOfWork.SaveChangesAsync();
+
+        return Result.Ok();
     }
 
     public async Task<Result> SendConfirmationEmailAsync(string email)
