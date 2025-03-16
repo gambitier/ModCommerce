@@ -2,7 +2,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using UserService.Domain.Interfaces.Services;
 using IdentityService.Contracts.Events.Users;
-namespace UserService.Infrastructure.MessageQueue.Consumers.IdentityService;
+namespace UserService.Infrastructure.MessageQueue.IdentityService.Events.UserCreated;
 
 /// <summary>
 /// This is a consumer for the <see cref="UserCreatedEvent"/>.

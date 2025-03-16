@@ -13,9 +13,6 @@ using UserService.Infrastructure.Communication.Options;
 using System.Reflection;
 using UserService.Infrastructure.Persistence;
 using UserService.Infrastructure.Persistence.Options;
-using UserService.Infrastructure.MessageQueue.Constants.IdentityService;
-using UserService.Infrastructure.MessageQueue.Consumers.IdentityService;
-using Microsoft.Extensions.Logging;
 
 namespace UserService.Infrastructure.Extensions;
 

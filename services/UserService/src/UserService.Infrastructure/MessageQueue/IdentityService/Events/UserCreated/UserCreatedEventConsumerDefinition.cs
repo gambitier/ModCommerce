@@ -1,7 +1,7 @@
 using MassTransit;
-using UserService.Infrastructure.MessageQueue.Constants.IdentityService;
+using UserService.Infrastructure.MessageQueue.IdentityService.Constants;
 
-namespace UserService.Infrastructure.MessageQueue.Consumers.IdentityService;
+namespace UserService.Infrastructure.MessageQueue.IdentityService.Events.UserCreated;
 
 /// <summary>
 /// This is a consumer definition for the <see cref="UserCreatedEventConsumer"/>.
