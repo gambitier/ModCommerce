@@ -29,10 +29,11 @@ public class UserCreatedEventConsumerDefinition : ConsumerDefinition<UserCreated
 
         // Configure retry policy
         endpointConfigurator.UseMessageRetry(r =>
-            r.Intervals(100, 200, 500, 1000, 2000));
+            r.Intervals(100, 200));
 
         endpointConfigurator.ClearSerialization();
         endpointConfigurator.UseRawJsonSerializer();
+        endpointConfigurator.UseRawJsonDeserializer(isDefault: true);
 
         if (endpointConfigurator is IRabbitMqReceiveEndpointConfigurator rabbitMqConfigurator)
         {
