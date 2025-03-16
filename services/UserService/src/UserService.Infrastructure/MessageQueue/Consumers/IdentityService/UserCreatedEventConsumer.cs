@@ -4,6 +4,10 @@ using UserService.Domain.Interfaces.Services;
 using IdentityService.Contracts.Events.Users;
 namespace UserService.Infrastructure.MessageQueue.Consumers.IdentityService;
 
+/// <summary>
+/// This is a consumer for the <see cref="UserCreatedEvent"/>.
+/// It is used to create an initial profile for a user.
+/// </summary>
 public class UserCreatedEventConsumer : IConsumer<UserCreatedEvent>
 {
     private readonly IUserProfileService _userProfileService;

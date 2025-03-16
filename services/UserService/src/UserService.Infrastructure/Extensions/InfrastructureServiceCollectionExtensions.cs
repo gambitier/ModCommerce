@@ -197,32 +197,16 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddMassTransit(busConfig =>
         {
             busConfig.SetKebabCaseEndpointNameFormatter();
-            // busConfig.AddConsumers(Assembly.GetExecutingAssembly());
-            busConfig.AddConsumer<UserCreatedEventConsumer>();
+            busConfig.AddConsumers(Assembly.GetExecutingAssembly());
 
             busConfig.UsingRabbitMq((context, cfg) =>
             {
                 var options = context.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
-                var logger = context.GetRequiredService<ILogger<UserCreatedEventConsumer>>();
 
                 cfg.Host(options.Host, options.VirtualHost, h =>
                 {
                     h.Username(options.Username);
                     h.Password(options.Password);
-                });
-
-                // Configure the consumer endpoint
-                cfg.ReceiveEndpoint(EventConstants.UserCreatedEvent.Queue, e =>
-                {
-                    var exchangeName = EventConstants.UserCreatedEvent.Exchange;
-                    logger.LogInformation("Binding queue {QueueName} to exchange {ExchangeName}",
-                        EventConstants.UserCreatedEvent.Queue,
-                        exchangeName);
-
-                    e.UseMessageRetry(r => r.Intervals(100, 200, 500, 1000, 2000));
-                    // Bind the queue to the exchange
-                    e.Bind(exchangeName);
-                    e.ConfigureConsumer<UserCreatedEventConsumer>(context);
                 });
 
                 cfg.ConfigureEndpoints(context);
