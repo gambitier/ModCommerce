@@ -1,4 +1,4 @@
-namespace UserService.Infrastructure.MessageQueue.Constants.IdentityService;
+namespace UserService.Infrastructure.MessageQueue.IdentityService.Constants;
 
 public static class EventConstants
 {
