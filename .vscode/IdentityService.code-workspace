@@ -5,6 +5,9 @@
     },
     {
       "path": "../services/UserService"
+    },
+    {
+      "path": "../resources"
     }
   ],
   "settings": {}
