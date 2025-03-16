@@ -1,7 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using UserService.Domain.Interfaces.Services;
-using IdentityService.Contracts.Events.Users;
+
 namespace UserService.Infrastructure.MessageQueue.IdentityService.Events.UserCreated;
 
 /// <summary>

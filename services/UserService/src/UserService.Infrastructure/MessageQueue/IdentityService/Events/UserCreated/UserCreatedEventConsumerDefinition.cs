@@ -1,4 +1,5 @@
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using UserService.Infrastructure.MessageQueue.IdentityService.Constants;
 
 namespace UserService.Infrastructure.MessageQueue.IdentityService.Events.UserCreated;
@@ -11,9 +12,11 @@ namespace UserService.Infrastructure.MessageQueue.IdentityService.Events.UserCre
 /// </summary>
 public class UserCreatedEventConsumerDefinition : ConsumerDefinition<UserCreatedEventConsumer>
 {
-    public UserCreatedEventConsumerDefinition()
+    private readonly ILogger<UserCreatedEventConsumerDefinition> _logger;
+
+    public UserCreatedEventConsumerDefinition(ILogger<UserCreatedEventConsumerDefinition> logger)
     {
-        // Set endpoint name explicitly
+        _logger = logger;
         EndpointName = EventConstants.UserCreatedEvent.Queue;
     }
 
@@ -22,15 +25,26 @@ public class UserCreatedEventConsumerDefinition : ConsumerDefinition<UserCreated
         IConsumerConfigurator<UserCreatedEventConsumer> consumerConfigurator,
         IRegistrationContext context)
     {
-        // endpointConfigurator.ConfigureConsumeTopology = false;
+        endpointConfigurator.ConfigureConsumeTopology = false;
 
         // Configure retry policy
         endpointConfigurator.UseMessageRetry(r =>
             r.Intervals(100, 200, 500, 1000, 2000));
 
+        endpointConfigurator.ClearSerialization();
+        endpointConfigurator.UseRawJsonSerializer();
+
         if (endpointConfigurator is IRabbitMqReceiveEndpointConfigurator rabbitMqConfigurator)
         {
+            _logger.LogInformation("Binding to exchange: {Exchange}", EventConstants.UserCreatedEvent.Exchange);
+
             // Bind to the exchange
+            // rabbitMqConfigurator.ExchangeType = "fanout"; // Match the exchange type
+            // rabbitMqConfigurator.Bind(EventConstants.UserCreatedEvent.Exchange, x =>
+            // {
+            //     x.ExchangeType = "fanout";
+            //     x.RoutingKey = ""; // Empty for fanout exchanges
+            // });
             rabbitMqConfigurator.Bind(EventConstants.UserCreatedEvent.Exchange);
         }
     }

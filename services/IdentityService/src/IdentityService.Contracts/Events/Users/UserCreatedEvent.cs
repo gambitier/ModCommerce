@@ -12,7 +12,7 @@ namespace IdentityService.Contracts.Events.Users;
 /// <param name="Username">The username of the created user.</param>
 /// <param name="CreatedAt">The UTC timestamp when the user was created.</param>
 [EntityName(EventConstants.UserCreatedEvent.Exchange)]
-// [MessageUrn(EventConstants.UserCreatedEvent.Urn)]
+[MessageUrn(EventConstants.UserCreatedEvent.Urn)]
 public record UserCreatedEvent(
     /// <summary>
     /// The unique identifier of the created user.
