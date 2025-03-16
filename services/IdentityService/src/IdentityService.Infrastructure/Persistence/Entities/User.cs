@@ -41,4 +41,14 @@ public class IdentityUser : Microsoft.AspNetCore.Identity.IdentityUser, IHasDoma
 
         return user;
     }
+
+    public void ConfirmEmail()
+    {
+        EmailConfirmed = true;
+        AddDomainEvent(new UserEmailConfirmedDomainEvent(
+            Id,
+            Email!,
+            DateTime.UtcNow
+        ));
+    }
 }

@@ -119,28 +119,23 @@ public class UserRepository : IUserRepository
         }));
     }
 
-    public async Task<Result<User>> ConfirmEmailAsync(string email, string token)
+    public async Task<Result> ConfirmEmailAsync(string email, string token)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
             return Result.Fail(DomainErrors.User.UserNotFound);
 
-        var successResponse = new User
-        {
-            Id = user.Id,
-            Email = user.Email!,
-            Username = user.UserName!,
-            EmailConfirmed = true
-        };
-
         if (user.EmailConfirmed)
-            return Result.Ok(successResponse);
+            return Result.Ok();
 
         var result = await _userManager.ConfirmEmailAsync(user, token);
         if (!result.Succeeded)
             return Result.Fail(DomainErrors.Authentication.InvalidEmailConfirmationToken);
 
-        return Result.Ok(successResponse);
+        // confirm the email once usermanger confirms the email
+        user.ConfirmEmail();
+
+        return Result.Ok();
     }
 
     public async Task<Result<string>> GenerateEmailConfirmationTokenAsync(string email)

@@ -13,7 +13,7 @@ using UserService.Infrastructure.Communication.Options;
 using System.Reflection;
 using UserService.Infrastructure.Persistence;
 using UserService.Infrastructure.Persistence.Options;
-
+using UserService.Domain.Interfaces.Persistence;
 namespace UserService.Infrastructure.Extensions;
 
 
@@ -63,7 +63,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddDbContext();
         services.AddServices();
         services.AddRepositories(options.RepositoryLifetime);
-
+        services.AddUnitOfWork();
         services.AddJwtAuthentication();
         services.AddMessageQueue();
         return services;
@@ -140,33 +140,12 @@ public static class InfrastructureServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// Adds the event consumers to the service collection.
-    /// </summary>
-    /// <param name="services">The service collection to add the event consumers to.</param>
-    /// <returns>The service collection with the event consumers added.</returns>
-    // public static IServiceCollection AddEventConsumers(this IServiceCollection services)
-    // {
-    //     // services.AddHostedService<UserProfileCreatedConsumer>();
-    //     // add all consumers here from UserService.Infrastructure.Consumers namespace
-    //     var consumerTypes = Assembly.Load("UserService.Infrastructure.Consumers")
-    //         .GetTypes()
-    //         .Where(t => t.IsClass && !t.IsAbstract && t.Namespace?.StartsWith("UserService.Infrastructure.Consumers") == true)
-    //         .ToList();
 
-    //     foreach (var consumerType in consumerTypes)
-    //     {
-    //         services.AddHostedService(sp =>
-    //         {
-    //             return new BackgroundService(sp =>
-    //             {
-    //                 var consumer = sp.GetRequiredService(consumerType) as IConsumer;
-    //                 return consumer.Consume(context);
-    //             });
-    //         });
-    //     }
-    //     return services;
-    // }
+    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        return services;
+    }
 
     /// <summary>
     /// Adds the JWT authentication to the service collection.

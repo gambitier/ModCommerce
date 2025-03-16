@@ -5,6 +5,11 @@ using IdentityService.Application.Interfaces.Services;
 using MassTransit;
 using IdentityService.Contracts.Events.Users;
 
+namespace IdentityService.Application.EventHandlers;
+
+/// <summary>
+/// Handles the <see cref="UserCreatedDomainEvent"/> event.
+/// </summary>
 public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDomainEvent>
 {
     private readonly IAuthenticationService _authenticationService;

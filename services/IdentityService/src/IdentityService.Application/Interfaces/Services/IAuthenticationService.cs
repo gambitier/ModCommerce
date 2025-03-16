@@ -8,7 +8,7 @@ public interface IAuthenticationService
     Task<Result> RegisterUserAsync(CreateUserDto user, string password);
     Task<Result<AuthResultDto>> AuthenticateAsync(TokenRequestDto user);
     Task<Result<AuthResultDto>> RefreshTokenAsync(string refreshToken);
-    Task<Result<AuthResultDto>> ConfirmEmailAsync(string email, string token);
+    Task<Result> ConfirmEmailAsync(string email, string token);
     Task<Result> SendConfirmationEmailAsync(string email);
     JsonWebKey[] GetJsonWebKeys();
 }
