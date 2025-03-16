@@ -6,6 +6,6 @@ public static class EventConstants
     {
         private const string Prefix = "IdentityService.Exchanges.Users";
         public const string Exchange = $"{Prefix}:UserCreatedExchange";
-        // public const string Urn = $"urn:message:{Exchange}";
+        public const string Urn = $"urn:message:ModCommerce:Events:UserCreated:v1";
     }
 }
