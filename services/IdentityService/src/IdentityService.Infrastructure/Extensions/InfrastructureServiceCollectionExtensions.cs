@@ -18,7 +18,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using MassTransit;
 using IdentityService.Infrastructure.Communication.Options;
-using IdentityService.Contracts.Constants;
 
 namespace IdentityService.Infrastructure.Extensions;
 

@@ -1,6 +1,5 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
-using IdentityService.Domain.Models;
 
 namespace IdentityService.Infrastructure.Authentication.Interfaces;
 

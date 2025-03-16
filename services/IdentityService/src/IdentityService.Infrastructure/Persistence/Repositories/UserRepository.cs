@@ -4,8 +4,6 @@ using FluentResults;
 using IdentityService.Domain.Errors;
 using IdentityService.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 
 namespace IdentityService.Infrastructure.Persistence.Repositories;
 
