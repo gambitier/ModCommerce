@@ -85,7 +85,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <returns>The service collection with the DbContext added.</returns>
     private static IServiceCollection AddDbContext(this IServiceCollection services)
     {
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        services.AddDbContext<IdentityDbContext>((sp, options) =>
         {
             var dbOptions = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             options.UseNpgsql(dbOptions.ConnectionString);
@@ -121,7 +121,7 @@ public static class InfrastructureServiceCollectionExtensions
                     new TokenProviderDescriptor(
                         typeof(CustomEmailConfirmationTokenProvider<Persistence.Entities.IdentityUser>)));
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddEntityFrameworkStores<IdentityDbContext>()
             .AddDefaultTokenProviders();
 
         return services;

@@ -12,9 +12,9 @@ namespace IdentityService.Infrastructure.Persistence.Repositories;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IdentityDbContext _context;
 
-    public RefreshTokenRepository(ApplicationDbContext context)
+    public RefreshTokenRepository(IdentityDbContext context)
     {
         _context = context;
     }

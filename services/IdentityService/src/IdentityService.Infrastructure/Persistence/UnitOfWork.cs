@@ -9,11 +9,11 @@ namespace IdentityService.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IdentityDbContext _context;
     private readonly IMediator _mediator;
     private IDbContextTransaction? _currentTransaction;
 
-    public UnitOfWork(ApplicationDbContext context, IMediator mediator)
+    public UnitOfWork(IdentityDbContext context, IMediator mediator)
     {
         _context = context;
         _mediator = mediator;
