@@ -2,7 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using AccountService.Contracts.API.Organizations.Requests;
 using AccountService.Contracts.API.Organizations.Enums;
-
+using AccountService.Domain.Models.Organizations.DomainModels;
+using AccountService.Domain.Interfaces.Services;
+using MapsterMapper;
+using AccountService.Contracts.API.Organizations.Responses;
+using FluentResults.Extensions.AspNetCore;
 namespace AccountService.API.Controllers;
 
 [Authorize]
@@ -10,20 +14,39 @@ namespace AccountService.API.Controllers;
 [Route("api/organizations")]
 public class OrganizationController : ControllerBase
 {
+    private readonly IOrganizationService _organizationService;
+    private readonly IMapper _mapper;
+
+    public OrganizationController(
+        IOrganizationService organizationService,
+        IMapper mapper)
+    {
+        _organizationService = organizationService;
+        _mapper = mapper;
+    }
+
     // POST /orgs
     [HttpPost]
-    public IActionResult CreateOrganization([FromBody] CreateOrganizationRequest org)
+    public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationRequest org)
     {
-        // Logic to create organization
-        return Ok(new { org_id = "456", name = org.Name });
+        var createOrganizationDomainModel = _mapper.Map<CreateOrganizationDomainModel>(org);
+
+        var organizationResult = await _organizationService.CreateOrganizationAsync(createOrganizationDomainModel);
+        if (organizationResult.IsFailed)
+            return organizationResult.ToActionResult();
+
+        return Ok(new CreateOrganizationResponse
+        {
+            Id = organizationResult.Value,
+        });
     }
 
     // GET /orgs/{orgId}
     [HttpGet("{orgId}")]
-    public IActionResult GetOrganization(string orgId)
+    public async Task<IActionResult> GetOrganization(Guid orgId)
     {
-        // Logic to get organization details
-        return Ok(new { org_id = "456", name = "Acme Corp", owner = "123" });
+        var organization = await _organizationService.GetByIdAsync(orgId);
+        return Ok(organization);
     }
 
     // POST /orgs/{org_id}/members
