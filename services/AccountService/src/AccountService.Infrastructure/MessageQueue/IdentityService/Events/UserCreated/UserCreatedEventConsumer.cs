@@ -1,6 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using AccountService.Domain.Interfaces.Services;
+using AccountService.Domain.Models.Users.DomainModels;
 
 namespace AccountService.Infrastructure.MessageQueue.IdentityService.Events.UserCreated;
 
@@ -30,10 +31,13 @@ public class UserCreatedEventConsumer : IConsumer<UserCreatedEvent>
                 "Consuming UserCreatedEvent for user {UserId}", message.UserId);
 
             await _userProfileService.CreateInitialProfileAsync(
-                message.UserId,
-                message.Email,
-                message.Username,
-                message.CreatedAt);
+                new CreateUserProfileDomainModel
+                {
+                    UserId = message.UserId,
+                    Email = message.Email,
+                    Username = message.Username,
+                    CreatedAt = message.CreatedAt
+                });
 
             _logger.LogInformation(
                 "Successfully created initial profile for user {UserId}", message.UserId);

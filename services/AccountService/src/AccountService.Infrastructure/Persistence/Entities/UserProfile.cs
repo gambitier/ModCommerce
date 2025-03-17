@@ -1,9 +1,11 @@
-namespace AccountService.Domain.Entities;
+using AccountService.Domain.Models.Users.DomainModels;
+
+namespace AccountService.Infrastructure.Persistence.Entities;
 
 /// <summary>
 /// Represents a user's profile information database entity.
 /// </summary>
-public class UserProfile
+public class UserProfileEntity
 {
     /// <summary>
     /// The unique identifier of the user profile.
@@ -35,7 +37,7 @@ public class UserProfile
     /// </summary>
     public DateTime CreatedAt { get; private set; }
 
-    private UserProfile(string userId, string email, string username, DateTime createdAt)
+    private UserProfileEntity(string userId, string email, string username, DateTime createdAt)
     {
         Id = Guid.NewGuid();
         UserId = userId;
@@ -48,13 +50,10 @@ public class UserProfile
     /// <summary>
     /// Creates a new user profile.
     /// </summary>
-    public static UserProfile Create(
-        string userId,
-        string email,
-        string username,
-        DateTime createdAt)
+    public static UserProfileEntity Create(CreateUserProfileDomainModel createUserProfileDomainModel)
     {
-        return new UserProfile(userId, email, username, createdAt);
+        var (UserId, Email, Username, CreatedAt) = createUserProfileDomainModel;
+        return new UserProfileEntity(UserId, Email, Username, CreatedAt);
     }
 
     /// <summary>

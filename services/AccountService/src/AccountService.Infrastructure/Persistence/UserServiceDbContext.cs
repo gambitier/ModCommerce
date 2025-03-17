@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using AccountService.Domain.Entities;
+using AccountService.Infrastructure.Persistence.Entities;
 
 namespace AccountService.Infrastructure.Persistence;
 
@@ -10,7 +10,7 @@ public class UserServiceDbContext : DbContext
     {
     }
 
-    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<UserProfileEntity> UserProfiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

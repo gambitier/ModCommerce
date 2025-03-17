@@ -1,10 +1,11 @@
-using AccountService.Domain.Entities;
+using AccountService.Domain.Models.Users.DomainModels;
+using AccountService.Domain.Models.Users.Dtos;
 
 namespace AccountService.Domain.Interfaces.Repositories;
 
 public interface IUserProfileRepository
 {
-    Task AddAsync(UserProfile userProfile);
-    Task<UserProfile?> GetByUserIdAsync(string userId);
-    Task ConfirmEmailAsync(string email);
+    Task AddAsync(CreateUserProfileDomainModel createUserProfileDomainModel);
+    Task<UserProfileDto?> GetByUserIdAsync(string userId);
+    Task ConfirmEmailAsync(ConfirmUserEmailDomainModel confirmUserEmailDomainModel);
 }

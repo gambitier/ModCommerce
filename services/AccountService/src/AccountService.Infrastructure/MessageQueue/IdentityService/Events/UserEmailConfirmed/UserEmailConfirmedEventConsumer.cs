@@ -1,7 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using AccountService.Domain.Interfaces.Services;
-
+using AccountService.Domain.Models.Users.DomainModels;
 namespace AccountService.Infrastructure.MessageQueue.IdentityService.Events.UserEmailConfirmed;
 
 /// <summary>
@@ -30,9 +30,12 @@ public class UserEmailConfirmedEventConsumer : IConsumer<UserEmailConfirmedEvent
 
             // Implement the logic for handling the email confirmation
             await _userProfileService.ConfirmEmailAsync(
-                message.UserId,
-                message.Email,
-                message.ConfirmedAt);
+                new ConfirmUserEmailDomainModel
+                {
+                    UserId = message.UserId,
+                    Email = message.Email,
+                    ConfirmedAt = message.ConfirmedAt
+                });
 
             _logger.LogInformation(
                 "Successfully confirmed email for user {UserId}", message.UserId);
