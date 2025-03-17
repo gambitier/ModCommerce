@@ -1,4 +1,6 @@
 using Mapster;
+using AccountService.Domain.Models.Organizations.DomainModels;
+using AccountService.Contracts.API.Organizations.Requests;
 
 namespace AccountService.API.Mapping;
 
@@ -7,10 +9,6 @@ public partial class ApiMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        // config.NewConfig<RegisterRequest, CreateUserDto>();
-        // config.NewConfig<TokenRequest, TokenRequestDto>();
-        // config.NewConfig<AuthResultDto, AuthResponse>();
-        // config.NewConfig<UserDetailsDto, UserResponse>();
-        // config.NewConfig<IEnumerable<UserDetailsDto>, IEnumerable<UserResponse>>();
+        config.NewConfig<CreateOrganizationDomainModel, CreateOrganizationRequest>();
     }
 }

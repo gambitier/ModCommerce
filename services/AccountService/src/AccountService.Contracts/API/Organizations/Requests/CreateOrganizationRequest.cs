@@ -2,5 +2,6 @@ namespace AccountService.Contracts.API.Organizations.Requests;
 
 public class CreateOrganizationRequest
 {
-    public string Name { get; set; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
 }

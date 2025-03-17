@@ -60,6 +60,6 @@ public class CustomAspNetCoreResultEndpointProfile : DefaultAspNetCoreResultEndp
         ConflictError => StatusCodes.Status409Conflict,
         ValidationError => StatusCodes.Status400BadRequest,
         InternalError => StatusCodes.Status500InternalServerError,
-        _ => StatusCodes.Status400BadRequest
+        _ => StatusCodes.Status500InternalServerError
     };
 }
