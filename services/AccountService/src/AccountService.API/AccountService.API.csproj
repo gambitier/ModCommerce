@@ -22,6 +22,7 @@
     <ProjectReference Include="../AccountService.Application/AccountService.Application.csproj" />
     <ProjectReference
       Include="../AccountService.Infrastructure/AccountService.Infrastructure.csproj" />
+    <ProjectReference Include="../AccountService.Contracts/AccountService.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
