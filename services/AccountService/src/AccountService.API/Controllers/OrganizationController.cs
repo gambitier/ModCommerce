@@ -9,6 +9,7 @@ using AccountService.Contracts.API.Organizations.Responses;
 using FluentResults.Extensions.AspNetCore;
 using System.Security.Claims;
 using AccountService.API.Extensions;
+using Mapster;
 namespace AccountService.API.Controllers;
 
 [Authorize]
@@ -27,7 +28,6 @@ public class OrganizationController : ControllerBase
         _mapper = mapper;
     }
 
-    // POST /orgs
     [HttpPost]
     public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationRequest org)
     {
@@ -44,7 +44,6 @@ public class OrganizationController : ControllerBase
         });
     }
 
-    // GET /orgs/{orgId}
     [HttpGet("{orgId}")]
     public async Task<IActionResult> GetOrganization(Guid orgId)
     {
@@ -55,15 +54,21 @@ public class OrganizationController : ControllerBase
         return Ok(organizationResult.Value);
     }
 
-    // POST /orgs/{org_id}/members
     [HttpPost("{orgId}/members")]
-    public IActionResult AddMember(string orgId, [FromBody] AddOrganizationMemberRequest request)
+    public async Task<IActionResult> AddMember(Guid orgId, [FromBody] AddOrganizationMemberRequest request)
     {
-        // Logic to add member
+        // TODO: possible bug: check if enum mapping is correct
+        var domainModel = (request, orgId).Adapt<CreateOrganizationMembershipRoleDomainModel>();
+
+        // TODO: instead of adding member directly, we should send an invitation email and delete this endpoint
+        // _organizationService.AddMemberAsync should be called when user accepts the invitation
+        var addMemberResult = await _organizationService.AddMemberAsync(User.GetUserId(), domainModel);
+        if (addMemberResult.IsFailed)
+            return addMemberResult.ToActionResult();
+
         return Ok(new { message = "User added to org" });
     }
 
-    // PUT /orgs/{org_id}/members/{user_id}
     [HttpPut("{orgId}/members/{userId}")]
     public IActionResult UpdateMemberRole(string orgId, string userId, [FromBody] OrganizationRole role)
     {
@@ -71,7 +76,6 @@ public class OrganizationController : ControllerBase
         return NoContent();
     }
 
-    // DELETE /orgs/{org_id}/members/{user_id}
     [HttpDelete("{orgId}/members/{userId}")]
     public IActionResult RemoveMember(string orgId, string userId)
     {

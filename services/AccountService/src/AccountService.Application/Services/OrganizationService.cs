@@ -59,4 +59,17 @@ public class OrganizationService : IOrganizationService
 
         return getOrgResult.Value;
     }
+
+    public async Task<Result> AddMemberAsync(string addedByUserId, CreateOrganizationMembershipRoleDomainModel domainModel)
+    {
+        var addMemberResult = await _userOrganizationMembershipRepository.AddAsync(domainModel);
+        if (addMemberResult.IsFailed)
+            return addMemberResult.ToResult();
+
+        var saveResult = await _unitOfWork.SaveChangesAsync();
+        if (saveResult.IsFailed)
+            return saveResult;
+
+        return Result.Ok();
+    }
 }
