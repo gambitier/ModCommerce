@@ -5,6 +5,6 @@ namespace AccountService.Domain.Interfaces.Services;
 
 public interface IOrganizationService
 {
-    Task<Result<Guid>> CreateOrganizationAsync(CreateOrganizationDomainModel createOrganizationDomainModel);
-    Task<OrganizationDto> GetByIdAsync(Guid id);
+    Task<Result<Guid>> CreateOrganizationAsync(string userId, CreateOrganizationDomainModel createOrganizationDomainModel);
+    Task<Result<OrganizationDto>> GetByIdAsync(Guid id);
 }

@@ -11,6 +11,10 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<OrganizationEn
         builder.ToTable("Organizations");
 
         builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id)
+            .IsRequired()
+            .HasColumnType("uuid");
+
         builder.Property(e => e.Name).IsRequired();
         builder.Property(e => e.Description);
         builder.Property(e => e.CreatedAt).IsRequired();

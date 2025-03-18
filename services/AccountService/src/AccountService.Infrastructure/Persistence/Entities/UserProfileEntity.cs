@@ -37,7 +37,11 @@ public class UserProfileEntity
     /// </summary>
     public DateTime CreatedAt { get; private set; }
 
-    private UserProfileEntity(string userId, string email, string username, DateTime createdAt)
+    private UserProfileEntity(
+        string userId,
+        string email,
+        string username,
+        DateTime createdAt)
     {
         Id = Guid.NewGuid();
         UserId = userId;

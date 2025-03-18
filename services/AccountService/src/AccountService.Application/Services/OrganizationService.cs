@@ -3,6 +3,7 @@ using AccountService.Domain.Interfaces.Repositories;
 using AccountService.Domain.Interfaces.Services;
 using AccountService.Domain.Models.Organizations.DomainModels;
 using AccountService.Domain.Models.Organizations.Dtos;
+using AccountService.Domain.Models.Organizations.Enums;
 using FluentResults;
 
 namespace AccountService.Application.Services;
@@ -11,28 +12,51 @@ public class OrganizationService : IOrganizationService
 {
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserOrganizationMembershipRepository _userOrganizationMembershipRepository;
 
     public OrganizationService(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IUserOrganizationMembershipRepository userOrganizationMembershipRepository)
     {
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
+        _userOrganizationMembershipRepository = userOrganizationMembershipRepository;
     }
 
-    public async Task<Result<Guid>> CreateOrganizationAsync(CreateOrganizationDomainModel createOrganizationDomainModel)
+    public async Task<Result<Guid>> CreateOrganizationAsync(string userId, CreateOrganizationDomainModel domainModel)
     {
-        var organizationId = await _organizationRepository.AddAsync(createOrganizationDomainModel);
+        var createOrgResult = await _organizationRepository.AddAsync(domainModel);
+        if (createOrgResult.IsFailed)
+            return createOrgResult.ToResult<Guid>();
+
+        var orgId = createOrgResult.Value;
+
+        var orgMembershipResult = await _userOrganizationMembershipRepository
+            .AddAsync(new CreateOrganizationMembershipRoleDomainModel
+            {
+                OrganizationId = orgId,
+                UserId = userId,
+                Role = UserOrganizationMembershipRole.Admin
+            });
+        if (orgMembershipResult.IsFailed)
+            return orgMembershipResult.ToResult<Guid>();
+
         var saveResult = await _unitOfWork.SaveChangesAsync();
         if (saveResult.IsFailed)
-        {
-            return Result.Fail(saveResult.Errors);
-        }
-        return organizationId;
+            return saveResult.ToResult<Guid>();
+
+        return orgId;
     }
 
-    public async Task<OrganizationDto> GetByIdAsync(Guid id)
+    public async Task<Result<OrganizationDto>> GetByIdAsync(Guid id)
     {
-        return await _organizationRepository.GetByIdAsync(id);
+        var getOrgResult = await _organizationRepository.GetByIdAsync(id);
+        if (getOrgResult.IsFailed)
+        {
+            return getOrgResult.ToResult();
+        }
+
+        return getOrgResult.Value;
     }
 }

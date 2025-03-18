@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AccountService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(UserServiceDbContext))]
-    [Migration("20250317215215_AddOrganizationsTable")]
-    partial class AddOrganizationsTable
+    [Migration("20250318151953_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,36 @@ namespace AccountService.Infrastructure.Persistence.Migrations
                     b.ToTable("Organizations", (string)null);
                 });
 
+            modelBuilder.Entity("AccountService.Infrastructure.Persistence.Entities.UserOrganizationMembership", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "OrganizationId", "Role");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("UserId", "OrganizationId", "Role")
+                        .IsUnique();
+
+                    b.ToTable("UserOrganizationMemberships", (string)null);
+                });
+
             modelBuilder.Entity("AccountService.Infrastructure.Persistence.Entities.UserProfileEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -79,6 +109,22 @@ namespace AccountService.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("UserProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("AccountService.Infrastructure.Persistence.Entities.UserOrganizationMembership", b =>
+                {
+                    b.HasOne("AccountService.Infrastructure.Persistence.Entities.OrganizationEntity", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AccountService.Infrastructure.Persistence.Entities.UserProfileEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .HasPrincipalKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
