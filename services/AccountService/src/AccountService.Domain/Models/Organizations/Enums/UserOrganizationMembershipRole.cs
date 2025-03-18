@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AccountService.Contracts.API.Organizations.Enums;
+namespace AccountService.Domain.Models.Organizations.Enums;
 
-public enum OrganizationRole
+public enum UserOrganizationMembershipRole
 {
     [Display(Name = "Owner")]
     Owner,
@@ -11,5 +11,5 @@ public enum OrganizationRole
     Admin,
 
     [Display(Name = "Member")]
-    Member
+    Member,
 }

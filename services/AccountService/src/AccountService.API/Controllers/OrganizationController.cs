@@ -7,6 +7,8 @@ using AccountService.Domain.Interfaces.Services;
 using MapsterMapper;
 using AccountService.Contracts.API.Organizations.Responses;
 using FluentResults.Extensions.AspNetCore;
+using System.Security.Claims;
+using AccountService.API.Extensions;
 namespace AccountService.API.Controllers;
 
 [Authorize]
@@ -29,9 +31,10 @@ public class OrganizationController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationRequest org)
     {
-        var createOrganizationDomainModel = _mapper.Map<CreateOrganizationDomainModel>(org);
+        var userId = User.GetUserId();
+        var createDomainModel = _mapper.Map<CreateOrganizationDomainModel>(org);
 
-        var organizationResult = await _organizationService.CreateOrganizationAsync(createOrganizationDomainModel);
+        var organizationResult = await _organizationService.CreateOrganizationAsync(userId, createDomainModel);
         if (organizationResult.IsFailed)
             return organizationResult.ToActionResult();
 
@@ -45,8 +48,11 @@ public class OrganizationController : ControllerBase
     [HttpGet("{orgId}")]
     public async Task<IActionResult> GetOrganization(Guid orgId)
     {
-        var organization = await _organizationService.GetByIdAsync(orgId);
-        return Ok(organization);
+        var organizationResult = await _organizationService.GetByIdAsync(orgId);
+        if (organizationResult.IsFailed)
+            return organizationResult.ToActionResult();
+
+        return Ok(organizationResult.Value);
     }
 
     // POST /orgs/{org_id}/members

@@ -11,7 +11,13 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfileEnti
         builder.ToTable("UserProfiles");
 
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.Id)
+            .IsRequired()
+            .HasColumnType("uuid");
+
+        builder.Property(x => x.UserId)
+            .IsRequired();
+
         builder.HasIndex(x => x.UserId).IsUnique();
     }
 }

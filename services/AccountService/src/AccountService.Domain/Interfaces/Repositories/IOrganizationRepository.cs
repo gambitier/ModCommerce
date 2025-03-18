@@ -1,9 +1,10 @@
 using AccountService.Domain.Models.Organizations.DomainModels;
 using AccountService.Domain.Models.Organizations.Dtos;
+using FluentResults;
 namespace AccountService.Domain.Interfaces.Repositories;
 
 public interface IOrganizationRepository
 {
-    Task<Guid> AddAsync(CreateOrganizationDomainModel createOrganizationDomainModel);
-    Task<OrganizationDto> GetByIdAsync(Guid id);
+    Task<Result<Guid>> AddAsync(CreateOrganizationDomainModel domainModel);
+    Task<Result<OrganizationDto>> GetByIdAsync(Guid id);
 }
