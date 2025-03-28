@@ -16,7 +16,7 @@ public class UserOrganizationMembershipRepository : IUserOrganizationMembershipR
         _dbContext = dbContext;
     }
 
-    public async Task<Result<Guid>> AddAsync(CreateOrganizationMembershipRoleDomainModel domainModel)
+    public async Task<Result<Guid>> AddAsync(AddToOrganizationMemberDomainModel domainModel)
     {
         var existingOrganizationMembership = await _dbContext
             .UserOrganizationMemberships
@@ -25,9 +25,7 @@ public class UserOrganizationMembershipRepository : IUserOrganizationMembershipR
                 && x.OrganizationId == domainModel.OrganizationId);
 
         if (existingOrganizationMembership != null)
-        {
             return Result.Fail(UserOrganizationMembershipDomainErrors.UserAlreadyMemberOfOrganization);
-        }
 
         var organizationMembership = UserOrganizationMembership.Create(domainModel);
         try

@@ -3,10 +3,9 @@ using AccountService.Domain.Models.Organizations.Enums;
 namespace AccountService.Domain.Models.Organizations.DomainModels;
 
 /// <summary>
-/// A domain model for creating a new organization membership role.
-/// Use this model to add a user to an organization.
+/// A domain model for adding a user to an organization.
 /// </summary>
-public class CreateOrganizationMembershipRoleDomainModel
+public class AddToOrganizationMemberDomainModel
 {
     /// <summary>
     /// The user id of the user to add to the organization.

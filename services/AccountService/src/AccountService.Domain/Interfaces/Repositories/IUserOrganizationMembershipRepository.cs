@@ -4,6 +4,6 @@ namespace AccountService.Domain.Interfaces.Repositories;
 
 public interface IUserOrganizationMembershipRepository
 {
-    Task<Result<Guid>> AddAsync(CreateOrganizationMembershipRoleDomainModel domainModel);
+    Task<Result<Guid>> AddAsync(AddToOrganizationMemberDomainModel domainModel);
     Task<Result> UpdateRoleAsync(UpdateOrganizationMembershipRoleDomainModel domainModel);
 }
