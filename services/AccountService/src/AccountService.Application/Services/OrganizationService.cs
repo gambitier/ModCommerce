@@ -33,7 +33,7 @@ public class OrganizationService : IOrganizationService
         var orgId = createOrgResult.Value;
 
         var orgMembershipResult = await _userOrganizationMembershipRepository
-            .AddAsync(new CreateOrganizationMembershipRoleDomainModel
+            .AddAsync(new AddToOrganizationMemberDomainModel
             {
                 OrganizationId = orgId,
                 UserId = userId,
@@ -60,7 +60,7 @@ public class OrganizationService : IOrganizationService
         return getOrgResult.Value;
     }
 
-    public async Task<Result> AddMemberAsync(string addedByUserId, CreateOrganizationMembershipRoleDomainModel domainModel)
+    public async Task<Result> AddMemberAsync(string addedByUserId, AddToOrganizationMemberDomainModel domainModel)
     {
         var addMemberResult = await _userOrganizationMembershipRepository.AddAsync(domainModel);
         if (addMemberResult.IsFailed)

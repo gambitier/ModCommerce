@@ -58,7 +58,7 @@ public class OrganizationController : ControllerBase
     public async Task<IActionResult> AddMember(Guid orgId, [FromBody] AddOrganizationMemberRequest request)
     {
         // TODO: possible bug: check if enum mapping is correct
-        var domainModel = (request, orgId).Adapt<CreateOrganizationMembershipRoleDomainModel>();
+        var domainModel = (request, orgId).Adapt<AddToOrganizationMemberDomainModel>();
 
         // TODO: instead of adding member directly, we should send an invitation email and delete this endpoint
         // _organizationService.AddMemberAsync should be called when user accepts the invitation

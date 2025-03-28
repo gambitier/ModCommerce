@@ -12,7 +12,7 @@ public partial class ApiMappingConfig : IRegister
     {
         config.NewConfig<CreateOrganizationDomainModel, CreateOrganizationRequest>();
 
-        config.NewConfig<(AddOrganizationMemberRequest request, Guid orgId), CreateOrganizationMembershipRoleDomainModel>()
+        config.NewConfig<(AddOrganizationMemberRequest request, Guid orgId), AddToOrganizationMemberDomainModel>()
             .Map(dest => dest.UserId, src => src.request.UserId)
             .Map(dest => dest.OrganizationId, src => src.orgId)
             .Map(dest => dest.Role, src => (UserOrganizationMembershipRole)src.request.Role);

@@ -28,7 +28,7 @@ public class UserOrganizationMembership
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static UserOrganizationMembership Create(CreateOrganizationMembershipRoleDomainModel createOrganizationMembershipRoleDomainModel)
+    public static UserOrganizationMembership Create(AddToOrganizationMemberDomainModel createOrganizationMembershipRoleDomainModel)
     {
         var (userId, organizationId, role) = createOrganizationMembershipRoleDomainModel;
         return new UserOrganizationMembership(userId, organizationId, role);
