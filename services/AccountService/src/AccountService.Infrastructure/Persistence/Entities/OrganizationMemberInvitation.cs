@@ -64,6 +64,7 @@ public class OrganizationMemberInvitation
             return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationNotForUser);
 
         AcceptedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
 
         // TODO: emit event for organization member added, 
         // handler of event will add the user to the organization's member list with the role
@@ -85,6 +86,7 @@ public class OrganizationMemberInvitation
             return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationNotForUser);
 
         RejectedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
         return Result.Ok();
     }
 }
