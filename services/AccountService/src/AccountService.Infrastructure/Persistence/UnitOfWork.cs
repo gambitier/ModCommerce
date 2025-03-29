@@ -2,7 +2,6 @@ using FluentResults;
 using AccountService.Domain.Interfaces.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using MediatR;
 using AccountService.Domain.Interfaces.Events;
 
 namespace AccountService.Infrastructure.Persistence;
@@ -10,13 +9,13 @@ namespace AccountService.Infrastructure.Persistence;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly UserServiceDbContext _context;
-    private readonly IMediator _mediator;
+    private readonly IDomainEventPublisher _domainEventPublisher;
     private IDbContextTransaction? _currentTransaction;
 
-    public UnitOfWork(UserServiceDbContext context, IMediator mediator)
+    public UnitOfWork(UserServiceDbContext context, IDomainEventPublisher domainEventPublisher)
     {
         _context = context;
-        _mediator = mediator;
+        _domainEventPublisher = domainEventPublisher;
     }
 
     /// <summary>
@@ -41,7 +40,7 @@ public class UnitOfWork : IUnitOfWork
 
         foreach (var domainEvent in domainEvents)
         {
-            await _mediator.Publish(domainEvent);
+            await _domainEventPublisher.PublishAsync(domainEvent);
         }
 
         _context.ChangeTracker.Entries<IHasDomainEvents>()
