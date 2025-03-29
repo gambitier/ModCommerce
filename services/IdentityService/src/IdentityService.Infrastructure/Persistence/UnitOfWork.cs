@@ -10,13 +10,13 @@ namespace IdentityService.Infrastructure.Persistence;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly IdentityDbContext _context;
-    private readonly IMediator _mediator;
+    private readonly IDomainEventPublisher _domainEventPublisher;
     private IDbContextTransaction? _currentTransaction;
 
-    public UnitOfWork(IdentityDbContext context, IMediator mediator)
+    public UnitOfWork(IdentityDbContext context, IDomainEventPublisher domainEventPublisher)
     {
         _context = context;
-        _mediator = mediator;
+        _domainEventPublisher = domainEventPublisher;
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class UnitOfWork : IUnitOfWork
 
         foreach (var domainEvent in domainEvents)
         {
-            await _mediator.Publish(domainEvent);
+            await _domainEventPublisher.PublishAsync(domainEvent);
         }
 
         _context.ChangeTracker.Entries<IHasDomainEvents>()
