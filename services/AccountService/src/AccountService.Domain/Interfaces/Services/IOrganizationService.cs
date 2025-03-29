@@ -7,5 +7,6 @@ public interface IOrganizationService
 {
     Task<Result<Guid>> CreateOrganizationAsync(string userId, CreateOrganizationDomainModel domainModel);
     Task<Result<OrganizationDto>> GetByIdAsync(Guid id);
-    Task<Result> AddMemberAsync(string addedByUserId, AddToOrganizationMemberDomainModel domainModel);
+    Task<Result> InviteMemberAsync(string invitedByUserId, InviteOrganizationMemberDomainModel domainModel);
+    Task<Result> AcceptOrganizationInvitationAsync(string userId, Guid invitationId);
 }

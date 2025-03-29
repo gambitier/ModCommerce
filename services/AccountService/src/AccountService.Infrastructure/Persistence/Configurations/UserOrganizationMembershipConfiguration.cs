@@ -4,9 +4,9 @@ using AccountService.Infrastructure.Persistence.Entities;
 
 namespace AccountService.Infrastructure.Persistence.Configurations;
 
-public class UserOrganizationMembershipConfiguration : IEntityTypeConfiguration<UserOrganizationMembership>
+public class UserOrganizationMembershipConfiguration : IEntityTypeConfiguration<OrganizationMemberInvitation>
 {
-    public void Configure(EntityTypeBuilder<UserOrganizationMembership> builder)
+    public void Configure(EntityTypeBuilder<OrganizationMemberInvitation> builder)
     {
         builder.ToTable("UserOrganizationMemberships");
 

@@ -12,7 +12,7 @@ public class UserServiceDbContext : DbContext
 
     public DbSet<UserProfileEntity> UserProfiles { get; set; }
     public DbSet<OrganizationEntity> Organizations { get; set; }
-    public DbSet<UserOrganizationMembership> UserOrganizationMemberships { get; set; }
+    public DbSet<OrganizationMemberInvitation> OrganizationMemberInvitations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

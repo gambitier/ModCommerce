@@ -54,19 +54,27 @@ public class OrganizationController : ControllerBase
         return Ok(organizationResult.Value);
     }
 
-    [HttpPost("{orgId}/members")]
-    public async Task<IActionResult> AddMember(Guid orgId, [FromBody] AddOrganizationMemberRequest request)
+    [HttpPost("{orgId}/invitations")]
+    public async Task<IActionResult> InviteMember(Guid orgId, [FromBody] InviteOrganizationMemberRequest request)
     {
         // TODO: possible bug: check if enum mapping is correct
-        var domainModel = (request, orgId).Adapt<AddToOrganizationMemberDomainModel>();
+        var domainModel = (request, orgId).Adapt<InviteOrganizationMemberDomainModel>();
 
-        // TODO: instead of adding member directly, we should send an invitation email and delete this endpoint
-        // _organizationService.AddMemberAsync should be called when user accepts the invitation
-        var addMemberResult = await _organizationService.AddMemberAsync(User.GetUserId(), domainModel);
-        if (addMemberResult.IsFailed)
-            return addMemberResult.ToActionResult();
+        var result = await _organizationService.InviteMemberAsync(User.GetUserId(), domainModel);
+        if (result.IsFailed)
+            return result.ToActionResult();
 
-        return Ok(new { message = "User added to org" });
+        return Ok(new { message = "User invited to organization" });
+    }
+
+    [HttpPost("invitations/{invitationId}/accept")]
+    public async Task<IActionResult> AcceptInvitation(Guid invitationId)
+    {
+        var result = await _organizationService.AcceptOrganizationInvitationAsync(User.GetUserId(), invitationId);
+        if (result.IsFailed)
+            return result.ToActionResult();
+
+        return Ok(new { message = "Invitation accepted" });
     }
 
     [HttpPut("{orgId}/members/{userId}")]
