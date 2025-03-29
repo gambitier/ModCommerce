@@ -49,19 +49,28 @@ public class OrganizationMemberInvitation
         return invitation;
     }
 
-    public Result Accept(string acceptedByUserId)
+    private Result ValidateInvitationStatus(string userId)
     {
-        if (ExpiresAt < DateTime.UtcNow)
-            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationExpired);
-
         if (AcceptedAt != null)
             return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationAlreadyAccepted);
 
         if (RejectedAt != null)
             return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationAlreadyRejected);
 
-        if (UserId != acceptedByUserId)
+        if (UserId != userId)
             return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationNotForUser);
+
+        if (ExpiresAt < DateTime.UtcNow)
+            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationExpired);
+
+        return Result.Ok();
+    }
+
+    public Result Accept(string acceptedByUserId)
+    {
+        var validationResult = ValidateInvitationStatus(acceptedByUserId);
+        if (validationResult.IsFailed)
+            return validationResult;
 
         AcceptedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
@@ -73,17 +82,9 @@ public class OrganizationMemberInvitation
 
     public Result Reject(string rejectedByUserId)
     {
-        if (ExpiresAt < DateTime.UtcNow)
-            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationExpired);
-
-        if (AcceptedAt != null)
-            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationAlreadyAccepted);
-
-        if (RejectedAt != null)
-            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationAlreadyRejected);
-
-        if (UserId != rejectedByUserId)
-            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationNotForUser);
+        var validationResult = ValidateInvitationStatus(rejectedByUserId);
+        if (validationResult.IsFailed)
+            return validationResult;
 
         RejectedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
