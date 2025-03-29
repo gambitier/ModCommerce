@@ -18,6 +18,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using MassTransit;
 using IdentityService.Infrastructure.Communication.Options;
+using IdentityService.Domain.Interfaces.Events;
+using IdentityService.Infrastructure.Events;
 
 namespace IdentityService.Infrastructure.Extensions;
 
@@ -278,6 +280,7 @@ public static class InfrastructureServiceCollectionExtensions
 
     private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
     {
+        services.AddScoped<IDomainEventPublisher, DomainEventPublisher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
