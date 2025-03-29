@@ -4,11 +4,11 @@ using AccountService.Infrastructure.Persistence.Entities;
 
 namespace AccountService.Infrastructure.Persistence.Configurations;
 
-public class UserOrganizationMembershipConfiguration : IEntityTypeConfiguration<OrganizationMemberInvitation>
+public class OrganizationMemberInvitationConfiguration : IEntityTypeConfiguration<Entities.OrganizationMemberInvitation>
 {
-    public void Configure(EntityTypeBuilder<OrganizationMemberInvitation> builder)
+    public void Configure(EntityTypeBuilder<Entities.OrganizationMemberInvitation> builder)
     {
-        builder.ToTable("UserOrganizationMemberships");
+        builder.ToTable("OrganizationMemberInvitations");
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.UserId).IsRequired();
