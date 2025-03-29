@@ -16,24 +16,63 @@ public class UserOrganizationMembershipRepository : IUserOrganizationMembershipR
         _dbContext = dbContext;
     }
 
-    public async Task<Result<Guid>> AddAsync(AddToOrganizationMemberDomainModel domainModel)
+    public Task<Result<Guid>> AddMemberAsync(AddOrganizationMemberDomainModel domainModel)
+    {
+        // TODO: call authorization service to add member to organization with role
+        throw new NotImplementedException();
+    }
+
+    public async Task<Result> AcceptOrganizationInvitationAsync(string acceptedByUserId, Guid invitationId)
+    {
+        var invitation = await _dbContext
+            .OrganizationMemberInvitations
+            .FirstOrDefaultAsync(x => x.Id == invitationId);
+
+        if (invitation == null)
+            return Result.Fail(OrganizationMemberInvitationsDomainErrors.OrganizationInvitationNotFound);
+
+        var acceptResult = invitation.Accept(acceptedByUserId);
+        if (acceptResult.IsFailed)
+            return acceptResult;
+
+        return Result.Ok();
+    }
+
+    public async Task<Result> RejectOrganizationInvitationAsync(string rejectedByUserId, Guid invitationId)
+    {
+        var invitation = await _dbContext
+            .OrganizationMemberInvitations
+            .FirstOrDefaultAsync(x => x.Id == invitationId);
+
+        if (invitation == null)
+            return Result.Fail(OrganizationMemberInvitationsDomainErrors.OrganizationInvitationNotFound);
+
+        var rejectResult = invitation.Reject(rejectedByUserId);
+        if (rejectResult.IsFailed)
+            return rejectResult;
+
+        return Result.Ok();
+    }
+
+    public async Task<Result> InviteMemberAsync(string invitedByUserId, InviteOrganizationMemberDomainModel domainModel)
     {
         var existingOrganizationMembership = await _dbContext
-            .UserOrganizationMemberships
+            .OrganizationMemberInvitations
             .FirstOrDefaultAsync(x =>
                 x.UserId == domainModel.UserId
                 && x.OrganizationId == domainModel.OrganizationId);
 
         if (existingOrganizationMembership != null)
-            return Result.Fail(UserOrganizationMembershipDomainErrors.UserAlreadyMemberOfOrganization);
+            return Result.Fail(OrganizationMemberInvitationsDomainErrors.InvitationExists);
 
-        var organizationMembership = UserOrganizationMembership.Create(domainModel);
+        var organizationMembership = OrganizationMemberInvitation.Create(invitedByUserId, domainModel);
         try
         {
             await _dbContext
-                .UserOrganizationMemberships
+                .OrganizationMemberInvitations
                 .AddAsync(organizationMembership);
-            return Result.Ok(organizationMembership.Id);
+
+            return Result.Ok();
         }
         catch (Exception ex)
         {
@@ -41,21 +80,9 @@ public class UserOrganizationMembershipRepository : IUserOrganizationMembershipR
         }
     }
 
-    public async Task<Result> UpdateRoleAsync(UpdateOrganizationMembershipRoleDomainModel domainModel)
+    public Task<Result> UpdateRoleAsync(UpdateOrganizationMembershipRoleDomainModel domainModel)
     {
-        var organizationMembership = await _dbContext
-            .UserOrganizationMemberships
-            .Where(x =>
-                x.UserId == domainModel.UserId
-                && x.OrganizationId == domainModel.OrganizationId)
-            .FirstOrDefaultAsync();
-
-        if (organizationMembership == null)
-        {
-            return Result.Fail(UserOrganizationMembershipDomainErrors.OrganizationMembershipNotFound);
-        }
-
-        organizationMembership.UpdateRole(domainModel.Role);
-        return Result.Ok();
+        // TODO: call authorization service to update role
+        throw new NotImplementedException();
     }
 }

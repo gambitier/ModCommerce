@@ -3,17 +3,17 @@ using AccountService.Domain.Models.Organizations.Enums;
 namespace AccountService.Domain.Models.Organizations.DomainModels;
 
 /// <summary>
-/// A domain model for adding a user to an organization.
+/// A domain model for inviting a user to an organization.
 /// </summary>
-public class AddToOrganizationMemberDomainModel
+public class InviteOrganizationMemberDomainModel
 {
     /// <summary>
-    /// The user id of the user to add to the organization.
+    /// The user id of the user to invite to the organization.
     /// </summary>
     public required string UserId { get; init; }
 
     /// <summary>
-    /// The id of the organization to add the user to.
+    /// The id of the organization to invite the user to.
     /// </summary>
     public required Guid OrganizationId { get; init; }
 

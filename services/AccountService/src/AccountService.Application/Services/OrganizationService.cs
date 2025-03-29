@@ -24,6 +24,15 @@ public class OrganizationService : IOrganizationService
         _userOrganizationMembershipRepository = userOrganizationMembershipRepository;
     }
 
+    public async Task<Result> AcceptOrganizationInvitationAsync(string userId, Guid invitationId)
+    {
+        var result = await _userOrganizationMembershipRepository.AcceptOrganizationInvitationAsync(userId, invitationId);
+        if (result.IsFailed)
+            return result;
+
+        return Result.Ok();
+    }
+
     public async Task<Result<Guid>> CreateOrganizationAsync(string userId, CreateOrganizationDomainModel domainModel)
     {
         var createOrgResult = await _organizationRepository.AddAsync(domainModel);
@@ -33,7 +42,7 @@ public class OrganizationService : IOrganizationService
         var orgId = createOrgResult.Value;
 
         var orgMembershipResult = await _userOrganizationMembershipRepository
-            .AddAsync(new AddToOrganizationMemberDomainModel
+            .AddMemberAsync(new AddOrganizationMemberDomainModel
             {
                 OrganizationId = orgId,
                 UserId = userId,
@@ -53,18 +62,16 @@ public class OrganizationService : IOrganizationService
     {
         var getOrgResult = await _organizationRepository.GetByIdAsync(id);
         if (getOrgResult.IsFailed)
-        {
             return getOrgResult.ToResult();
-        }
 
         return getOrgResult.Value;
     }
 
-    public async Task<Result> AddMemberAsync(string addedByUserId, AddToOrganizationMemberDomainModel domainModel)
+    public async Task<Result> InviteMemberAsync(string invitedByUserId, InviteOrganizationMemberDomainModel domainModel)
     {
-        var addMemberResult = await _userOrganizationMembershipRepository.AddAsync(domainModel);
+        var addMemberResult = await _userOrganizationMembershipRepository.InviteMemberAsync(invitedByUserId, domainModel);
         if (addMemberResult.IsFailed)
-            return addMemberResult.ToResult();
+            return addMemberResult;
 
         var saveResult = await _unitOfWork.SaveChangesAsync();
         if (saveResult.IsFailed)
