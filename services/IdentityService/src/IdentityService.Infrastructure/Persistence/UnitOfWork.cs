@@ -2,7 +2,6 @@ using FluentResults;
 using IdentityService.Domain.Interfaces.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using MediatR;
 using IdentityService.Domain.Interfaces.Events;
 
 namespace IdentityService.Infrastructure.Persistence;

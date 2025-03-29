@@ -14,6 +14,8 @@ using System.Reflection;
 using AccountService.Infrastructure.Persistence;
 using AccountService.Infrastructure.Persistence.Options;
 using AccountService.Domain.Interfaces.Persistence;
+using AccountService.Domain.Interfaces.Events;
+using AccountService.Infrastructure.Events;
 namespace AccountService.Infrastructure.Extensions;
 
 
@@ -143,6 +145,7 @@ public static class InfrastructureServiceCollectionExtensions
 
     private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
     {
+        services.AddScoped<IDomainEventPublisher, DomainEventPublisher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
