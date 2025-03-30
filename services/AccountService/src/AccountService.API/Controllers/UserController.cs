@@ -8,13 +8,9 @@ namespace AccountService.API.Controllers;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult Get()
-    {
-        return Ok("Hello World");
-    }
-
     [HttpGet("me/orgs")]
+    [EndpointSummary("Get User Organizations")]
+    [EndpointDescription("Gets the organizations that the user is a member of")]
     public IActionResult GetUserOrganizations()
     {
         // Logic to get user organizations
