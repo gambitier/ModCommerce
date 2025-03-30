@@ -18,6 +18,16 @@ public class UserProfileEntity
     public string UserId { get; private set; }
 
     /// <summary>
+    /// The first name of the user.
+    /// </summary>
+    public string? FirstName { get; private set; }
+
+    /// <summary>
+    /// The last name of the user.
+    /// </summary>
+    public string? LastName { get; private set; }
+
+    /// <summary>
     /// The email address of the user, provided by the Identity service.
     /// </summary>
     public string Email { get; private set; }
@@ -36,6 +46,11 @@ public class UserProfileEntity
     /// The date and time the user profile was created.
     /// </summary>
     public DateTime CreatedAt { get; private set; }
+
+    /// <summary>
+    /// The date and time the user profile was updated.
+    /// </summary>
+    public DateTime? UpdatedAt { get; private set; }
 
     private UserProfileEntity(
         string userId,
@@ -67,6 +82,14 @@ public class UserProfileEntity
     public void Activate()
     {
         Status = ProfileStatus.Active;
+    }
+
+    public void Update(UpdateUserProfileDomainModel updateUserProfileDomainModel)
+    {
+        var (firstName, lastName) = updateUserProfileDomainModel;
+        FirstName = firstName;
+        LastName = lastName;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
 
