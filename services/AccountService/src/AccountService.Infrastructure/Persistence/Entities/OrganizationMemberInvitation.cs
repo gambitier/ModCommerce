@@ -1,4 +1,5 @@
 using AccountService.Domain.Errors;
+using AccountService.Domain.Events;
 using AccountService.Domain.Models.Organizations.DomainModels;
 using AccountService.Domain.Models.Organizations.Enums;
 using FluentResults;
@@ -8,7 +9,7 @@ namespace AccountService.Infrastructure.Persistence.Entities;
 /// <summary>
 /// Represents a user's invitation to join an organization database entity.
 /// </summary>
-public class OrganizationMemberInvitation
+public class OrganizationMemberInvitation : DomainEventEntity
 {
     public Guid Id { get; private set; }
     public string UserId { get; private set; }
@@ -44,8 +45,16 @@ public class OrganizationMemberInvitation
     {
         var (userId, organizationId, role) = createOrganizationMembershipRoleDomainModel;
         var invitation = new OrganizationMemberInvitation(userId, invitedByUserId, organizationId, role);
-        // TODO: emit event for organization member invited
-        // handler of event will send invitation email
+
+        invitation.AddDomainEvent(new OrgMemberInvitedDomainEvent(
+            invitation.Id,
+            invitation.UserId,
+            invitation.InvitedByUserId,
+            invitation.OrganizationId,
+            invitation.Role,
+            invitation.ExpiresAt
+        ));
+
         return invitation;
     }
 

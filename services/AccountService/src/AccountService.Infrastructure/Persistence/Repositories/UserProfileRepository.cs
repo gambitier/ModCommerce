@@ -3,6 +3,7 @@ using AccountService.Domain.Interfaces.Repositories;
 using AccountService.Domain.Models.Users.Dtos;
 using AccountService.Infrastructure.Persistence.Entities;
 using AccountService.Domain.Models.Users.DomainModels;
+
 namespace AccountService.Infrastructure.Persistence.Repositories;
 
 public class UserProfileRepository : IUserProfileRepository
@@ -28,12 +29,39 @@ public class UserProfileRepository : IUserProfileRepository
             {
                 Id = x.Id,
                 UserId = x.UserId,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
                 Email = x.Email,
                 Username = x.Username,
                 CreatedAt = x.CreatedAt
             });
 
         return await query.FirstOrDefaultAsync();
+    }
+
+    public async Task<Dictionary<string, UserProfileDto?>> GetUserProfilesAsync(IEnumerable<string> userIds)
+    {
+        var distinctUserIds = userIds.Distinct().ToList();
+
+        var query = _dbContext.UserProfiles
+            .Where(x => distinctUserIds.Contains(x.UserId))
+            .Select(x => new UserProfileDto
+            {
+                Id = x.Id,
+                UserId = x.UserId,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                Email = x.Email,
+                Username = x.Username,
+                CreatedAt = x.CreatedAt
+            });
+
+        var foundProfiles = await query.ToDictionaryAsync(x => x.UserId, x => x);
+
+        return distinctUserIds.ToDictionary(
+            userId => userId,
+            userId => foundProfiles.GetValueOrDefault(userId)
+        );
     }
 
     public async Task ConfirmEmailAsync(ConfirmUserEmailDomainModel confirmUserEmailDomainModel)
@@ -44,4 +72,5 @@ public class UserProfileRepository : IUserProfileRepository
 
         profile.Activate();
     }
+
 }

@@ -11,6 +11,16 @@ public class UserProfileDto
     public required Guid Id { get; init; }
 
     /// <summary>
+    /// The first name of the user.
+    /// </summary>
+    public string? FirstName { get; init; }
+
+    /// <summary>
+    /// The last name of the user.
+    /// </summary>
+    public string? LastName { get; init; }
+
+    /// <summary>
     /// The unique identifier of the user created in the Identity service.
     /// </summary>
     public required string UserId { get; init; }
