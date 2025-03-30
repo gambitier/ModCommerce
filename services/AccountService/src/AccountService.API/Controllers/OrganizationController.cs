@@ -29,6 +29,8 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpPost]
+    [EndpointSummary("Create Organization")]
+    [EndpointDescription("Creates a new organization")]
     public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationRequest org)
     {
         var userId = User.GetUserId();
@@ -45,6 +47,8 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpGet("{orgId}")]
+    [EndpointSummary("Get Organization")]
+    [EndpointDescription("Gets an organization by its ID")]
     public async Task<IActionResult> GetOrganization(Guid orgId)
     {
         var organizationResult = await _organizationService.GetByIdAsync(orgId);
@@ -55,6 +59,8 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpPost("{orgId}/invitations")]
+    [EndpointSummary("Invite Member to Organization")]
+    [EndpointDescription("Creates an invitation for a user to join the specified organization and sends them an email")]
     public async Task<IActionResult> InviteMember(Guid orgId, [FromBody] InviteOrganizationMemberRequest request)
     {
         // TODO: possible bug: check if enum mapping is correct
@@ -68,6 +74,8 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpPost("invitations/{invitationId}/accept")]
+    [EndpointSummary("Accept Invitation")]
+    [EndpointDescription("Accepts an invitation to join an organization")]
     public async Task<IActionResult> AcceptInvitation(Guid invitationId)
     {
         var result = await _organizationService.AcceptOrganizationInvitationAsync(User.GetUserId(), invitationId);
@@ -78,6 +86,8 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpPut("{orgId}/members/{userId}")]
+    [EndpointSummary("Update Member Role")]
+    [EndpointDescription("Updates the role of a member in an organization")]
     public IActionResult UpdateMemberRole(string orgId, string userId, [FromBody] OrganizationRole role)
     {
         // Logic to update member role
@@ -85,6 +95,8 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpDelete("{orgId}/members/{userId}")]
+    [EndpointSummary("Remove Member")]
+    [EndpointDescription("Removes a member from an organization")]
     public IActionResult RemoveMember(string orgId, string userId)
     {
         // Logic to remove member
