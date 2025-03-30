@@ -24,5 +24,14 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.Property(rt => rt.ExpiresAt).IsRequired();
         builder.Property(rt => rt.CreatedAt).IsRequired();
         builder.Property(rt => rt.IsRevoked).IsRequired();
+
+
+        // Order of the columns
+        builder.Property(x => x.Id).HasColumnOrder(1);
+        builder.Property(x => x.UserId).HasColumnOrder(2);
+        builder.Property(x => x.Token).HasColumnOrder(3);
+        builder.Property(x => x.CreatedAt).HasColumnOrder(4);
+        builder.Property(x => x.ExpiresAt).HasColumnOrder(5);
+        builder.Property(x => x.IsRevoked).HasColumnOrder(6);
     }
 }
