@@ -62,7 +62,7 @@ public class UserProfileEntity
         UserId = userId;
         Email = email;
         Username = username;
-        Status = ProfileStatus.PendingVerification;
+        Status = ProfileStatus.PendingEmailVerification;
         CreatedAt = createdAt;
     }
 
@@ -81,7 +81,7 @@ public class UserProfileEntity
     /// </summary>
     public void Activate()
     {
-        Status = ProfileStatus.Active;
+        Status = ProfileStatus.EmailVerified;
     }
 
     public void Update(UpdateUserProfileDomainModel updateUserProfileDomainModel)
@@ -98,6 +98,6 @@ public class UserProfileEntity
 /// </summary>
 public enum ProfileStatus
 {
-    PendingVerification,
-    Active
+    PendingEmailVerification,
+    EmailVerified
 }

@@ -37,5 +37,17 @@ public class OrganizationMemberInvitationConfiguration : IEntityTypeConfiguratio
             .HasForeignKey(x => x.OrganizationId)
             .HasPrincipalKey(x => x.Id)
             .OnDelete(DeleteBehavior.Cascade);
+
+
+        // Order of the columns
+        builder.Property(x => x.Id).HasColumnOrder(1);
+        builder.Property(x => x.UserId).HasColumnOrder(2);
+        builder.Property(x => x.InvitedByUserId).HasColumnOrder(3);
+        builder.Property(x => x.OrganizationId).HasColumnOrder(4);
+        builder.Property(x => x.AcceptedAt).HasColumnOrder(5);
+        builder.Property(x => x.RejectedAt).HasColumnOrder(6);
+        builder.Property(x => x.CreatedAt).HasColumnOrder(7);
+        builder.Property(x => x.UpdatedAt).HasColumnOrder(8);
+        builder.Property(x => x.ExpiresAt).HasColumnOrder(9);
     }
 }
