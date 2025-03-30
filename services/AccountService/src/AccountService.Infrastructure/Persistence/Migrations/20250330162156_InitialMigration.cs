@@ -32,10 +32,13 @@ namespace AccountService.Infrastructure.Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
                     Username = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,27 +47,31 @@ namespace AccountService.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserOrganizationMemberships",
+                name: "OrganizationMemberInvitations",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false),
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    InvitedByUserId = table.Column<string>(type: "text", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AcceptedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RejectedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserOrganizationMemberships", x => new { x.UserId, x.OrganizationId, x.Role });
+                    table.PrimaryKey("PK_OrganizationMemberInvitations", x => new { x.UserId, x.OrganizationId, x.Role });
                     table.ForeignKey(
-                        name: "FK_UserOrganizationMemberships_Organizations_OrganizationId",
+                        name: "FK_OrganizationMemberInvitations_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserOrganizationMemberships_UserProfiles_UserId",
+                        name: "FK_OrganizationMemberInvitations_UserProfiles_UserId",
                         column: x => x.UserId,
                         principalTable: "UserProfiles",
                         principalColumn: "UserId",
@@ -72,13 +79,13 @@ namespace AccountService.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserOrganizationMemberships_OrganizationId",
-                table: "UserOrganizationMemberships",
+                name: "IX_OrganizationMemberInvitations_OrganizationId",
+                table: "OrganizationMemberInvitations",
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserOrganizationMemberships_UserId_OrganizationId_Role",
-                table: "UserOrganizationMemberships",
+                name: "IX_OrganizationMemberInvitations_UserId_OrganizationId_Role",
+                table: "OrganizationMemberInvitations",
                 columns: new[] { "UserId", "OrganizationId", "Role" },
                 unique: true);
 
@@ -93,7 +100,7 @@ namespace AccountService.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UserOrganizationMemberships");
+                name: "OrganizationMemberInvitations");
 
             migrationBuilder.DropTable(
                 name: "Organizations");

@@ -19,5 +19,12 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<OrganizationEn
         builder.Property(e => e.Description);
         builder.Property(e => e.CreatedAt).IsRequired();
         builder.Property(e => e.UpdatedAt).IsRequired();
+
+        // Order of the columns
+        builder.Property(e => e.Id).HasColumnOrder(1);
+        builder.Property(e => e.Name).HasColumnOrder(2);
+        builder.Property(e => e.Description).HasColumnOrder(3);
+        builder.Property(e => e.CreatedAt).HasColumnOrder(4);
+        builder.Property(e => e.UpdatedAt).HasColumnOrder(5);
     }
 }
