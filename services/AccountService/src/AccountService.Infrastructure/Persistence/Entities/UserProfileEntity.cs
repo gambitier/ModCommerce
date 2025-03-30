@@ -1,3 +1,4 @@
+using AccountService.Domain.Events;
 using AccountService.Domain.Models.Users.DomainModels;
 
 namespace AccountService.Infrastructure.Persistence.Entities;
@@ -5,7 +6,7 @@ namespace AccountService.Infrastructure.Persistence.Entities;
 /// <summary>
 /// Represents a user's profile information database entity.
 /// </summary>
-public class UserProfileEntity
+public class UserProfileEntity : DomainEventEntity
 {
     /// <summary>
     /// The unique identifier of the user profile.
@@ -72,7 +73,12 @@ public class UserProfileEntity
     public static UserProfileEntity Create(CreateUserProfileDomainModel createUserProfileDomainModel)
     {
         var (UserId, Email, Username, CreatedAt) = createUserProfileDomainModel;
-        return new UserProfileEntity(UserId, Email, Username, CreatedAt);
+        var userProfile = new UserProfileEntity(UserId, Email, Username, CreatedAt);
+        userProfile.AddDomainEvent(new UserProfileCreatedDomainEvent(
+            userProfile.Id,
+            UserId
+        ));
+        return userProfile;
     }
 
     /// <summary>
