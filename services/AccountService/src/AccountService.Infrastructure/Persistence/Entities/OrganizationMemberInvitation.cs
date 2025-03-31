@@ -1,5 +1,5 @@
 using AccountService.Domain.Errors;
-using AccountService.Domain.Events;
+using AccountService.Domain.Events.OrgMember;
 using AccountService.Domain.Models.Organizations.DomainModels;
 using AccountService.Domain.Models.Organizations.Enums;
 using FluentResults;

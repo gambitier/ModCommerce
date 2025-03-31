@@ -1,4 +1,4 @@
-using AccountService.Domain.Events;
+using AccountService.Domain.Events.UserProfile;
 using AccountService.Domain.Models.Users.DomainModels;
 
 namespace AccountService.Infrastructure.Persistence.Entities;

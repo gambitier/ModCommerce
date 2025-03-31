@@ -1,4 +1,4 @@
-using AccountService.Domain.Events;
+using AccountService.Domain.Events.OrgMember;
 using AccountService.Domain.Interfaces.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
