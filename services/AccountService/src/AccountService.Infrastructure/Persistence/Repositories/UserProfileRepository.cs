@@ -8,9 +8,9 @@ namespace AccountService.Infrastructure.Persistence.Repositories;
 
 public class UserProfileRepository : IUserProfileRepository
 {
-    private readonly UserServiceDbContext _dbContext;
+    private readonly AccountDbContext _dbContext;
 
-    public UserProfileRepository(UserServiceDbContext dbContext)
+    public UserProfileRepository(AccountDbContext dbContext)
     {
         _dbContext = dbContext;
     }

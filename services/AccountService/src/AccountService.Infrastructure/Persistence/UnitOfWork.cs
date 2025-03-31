@@ -8,11 +8,11 @@ namespace AccountService.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly UserServiceDbContext _context;
+    private readonly AccountDbContext _context;
     private readonly IDomainEventPublisher _domainEventPublisher;
     private IDbContextTransaction? _currentTransaction;
 
-    public UnitOfWork(UserServiceDbContext context, IDomainEventPublisher domainEventPublisher)
+    public UnitOfWork(AccountDbContext context, IDomainEventPublisher domainEventPublisher)
     {
         _context = context;
         _domainEventPublisher = domainEventPublisher;
