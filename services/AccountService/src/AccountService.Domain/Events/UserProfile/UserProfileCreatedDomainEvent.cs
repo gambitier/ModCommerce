@@ -1,7 +1,6 @@
-using AccountService.Domain.Models.Organizations.Enums;
 using MediatR;
 
-namespace AccountService.Domain.Events;
+namespace AccountService.Domain.Events.UserProfile;
 
 public class UserProfileCreatedDomainEvent : INotification
 {
