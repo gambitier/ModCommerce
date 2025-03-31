@@ -9,9 +9,9 @@ namespace AccountService.Infrastructure.Persistence.Repositories;
 
 public class UserOrganizationMembershipRepository : IUserOrganizationMembershipRepository
 {
-    private readonly UserServiceDbContext _dbContext;
+    private readonly AccountDbContext _dbContext;
 
-    public UserOrganizationMembershipRepository(UserServiceDbContext dbContext)
+    public UserOrganizationMembershipRepository(AccountDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -10,9 +10,9 @@ namespace AccountService.Infrastructure.Persistence.Repositories;
 
 public class OrganizationRepository : IOrganizationRepository
 {
-    private readonly UserServiceDbContext _dbContext;
+    private readonly AccountDbContext _dbContext;
 
-    public OrganizationRepository(UserServiceDbContext dbContext)
+    public OrganizationRepository(AccountDbContext dbContext)
     {
         _dbContext = dbContext;
     }
