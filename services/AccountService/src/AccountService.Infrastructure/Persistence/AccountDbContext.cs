@@ -3,9 +3,9 @@ using AccountService.Infrastructure.Persistence.Entities;
 
 namespace AccountService.Infrastructure.Persistence;
 
-public class UserServiceDbContext : DbContext
+public class AccountDbContext : DbContext
 {
-    public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options)
+    public AccountDbContext(DbContextOptions<AccountDbContext> options)
         : base(options)
     {
     }
@@ -16,6 +16,6 @@ public class UserServiceDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserServiceDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AccountDbContext).Assembly);
     }
 }

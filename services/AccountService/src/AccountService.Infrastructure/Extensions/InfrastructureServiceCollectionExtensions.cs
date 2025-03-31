@@ -90,7 +90,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <returns>The service collection with the DbContext added.</returns>
     private static IServiceCollection AddDbContext(this IServiceCollection services)
     {
-        services.AddDbContext<UserServiceDbContext>((sp, options) =>
+        services.AddDbContext<AccountDbContext>((sp, options) =>
         {
             var dbOptions = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             options.UseNpgsql(dbOptions.ConnectionString);
