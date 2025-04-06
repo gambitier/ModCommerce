@@ -1,7 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using AccountService.Domain.Interfaces.Services;
-using AccountService.Domain.Models.Users.DomainModels;
+using AccountService.Domain.Interfaces.Events;
+using AccountService.Domain.Events.UserProfile;
 namespace AccountService.Infrastructure.MessageQueue.IdentityService.Events.UserEmailConfirmed;
 
 /// <summary>
@@ -10,13 +10,13 @@ namespace AccountService.Infrastructure.MessageQueue.IdentityService.Events.User
 /// </summary>
 public class UserEmailConfirmedEventConsumer : IConsumer<UserEmailConfirmedEvent>
 {
-    private readonly IUserProfileService _userProfileService;
+    private readonly IDomainEventPublisher _domainEventPublisher;
     private readonly ILogger<UserEmailConfirmedEventConsumer> _logger;
     public UserEmailConfirmedEventConsumer(
-        IUserProfileService userProfileService,
+        IDomainEventPublisher domainEventPublisher,
         ILogger<UserEmailConfirmedEventConsumer> logger)
     {
-        _userProfileService = userProfileService;
+        _domainEventPublisher = domainEventPublisher;
         _logger = logger;
     }
 
@@ -25,26 +25,21 @@ public class UserEmailConfirmedEventConsumer : IConsumer<UserEmailConfirmedEvent
         try
         {
             var message = context.Message;
-            _logger.LogInformation(
-                "Consuming UserEmailConfirmedEvent for user {UserId}", message.UserId);
-
-            // Implement the logic for handling the email confirmation
-            await _userProfileService.ConfirmEmailAsync(
-                new ConfirmUserEmailDomainModel
+            await _domainEventPublisher.PublishAsync(
+                new UserEmailConfirmationReceivedIntegrationEvent
                 {
                     UserId = message.UserId,
                     Email = message.Email,
                     ConfirmedAt = message.ConfirmedAt
-                });
-
-            _logger.LogInformation(
-                "Successfully confirmed email for user {UserId}", message.UserId);
+                }
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Error processing UserEmailConfirmedEvent for user {UserId}",
+                "Error processing {EventName} for user {UserId}",
+                nameof(UserEmailConfirmedEvent),
                 context.Message.UserId);
             throw; // Let MassTransit handle the retry policy
         }

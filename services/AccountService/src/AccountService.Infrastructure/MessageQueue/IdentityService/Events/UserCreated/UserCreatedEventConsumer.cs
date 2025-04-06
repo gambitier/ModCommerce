@@ -1,8 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using AccountService.Domain.Interfaces.Services;
-using AccountService.Domain.Models.Users.DomainModels;
-
+using AccountService.Domain.Events.UserProfile;
+using AccountService.Domain.Interfaces.Events;
 namespace AccountService.Infrastructure.MessageQueue.IdentityService.Events.UserCreated;
 
 /// <summary>
@@ -11,14 +10,14 @@ namespace AccountService.Infrastructure.MessageQueue.IdentityService.Events.User
 /// </summary>
 public class UserCreatedEventConsumer : IConsumer<UserCreatedEvent>
 {
-    private readonly IUserProfileService _userProfileService;
+    private readonly IDomainEventPublisher _domainEventPublisher;
     private readonly ILogger<UserCreatedEventConsumer> _logger;
 
     public UserCreatedEventConsumer(
-        IUserProfileService userProfileService,
+        IDomainEventPublisher domainEventPublisher,
         ILogger<UserCreatedEventConsumer> logger)
     {
-        _userProfileService = userProfileService;
+        _domainEventPublisher = domainEventPublisher;
         _logger = logger;
     }
 
@@ -26,27 +25,21 @@ public class UserCreatedEventConsumer : IConsumer<UserCreatedEvent>
     {
         try
         {
-            var message = context.Message;
-            _logger.LogInformation(
-                "Consuming UserCreatedEvent for user {UserId}", message.UserId);
-
-            await _userProfileService.CreateInitialProfileAsync(
-                new CreateUserProfileDomainModel
+            await _domainEventPublisher.PublishAsync(
+                new UserAccountCreatedIntegrationEvent
                 {
-                    UserId = message.UserId,
-                    Email = message.Email,
-                    Username = message.Username,
-                    CreatedAt = message.CreatedAt
+                    UserId = context.Message.UserId,
+                    Email = context.Message.Email,
+                    Username = context.Message.Username,
+                    CreatedAt = context.Message.CreatedAt
                 });
-
-            _logger.LogInformation(
-                "Successfully created initial profile for user {UserId}", message.UserId);
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Error processing UserCreatedEvent for user {UserId}",
+                "Error processing {EventName} for user {UserId}",
+                nameof(UserCreatedEvent),
                 context.Message.UserId);
             throw; // Let MassTransit handle the retry policy
         }

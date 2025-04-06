@@ -16,6 +16,7 @@ using AccountService.Infrastructure.Persistence.Options;
 using AccountService.Domain.Interfaces.Persistence;
 using AccountService.Domain.Interfaces.Events;
 using AccountService.Infrastructure.Events;
+using AccountService.Infrastructure.Sagas;
 namespace AccountService.Infrastructure.Extensions;
 
 
@@ -178,6 +179,8 @@ public static class InfrastructureServiceCollectionExtensions
             busConfig.SetKebabCaseEndpointNameFormatter();
             busConfig.AddConsumers(Assembly.GetExecutingAssembly());
 
+            busConfig.RegisterSagas();
+
             busConfig.UsingRabbitMq((context, cfg) =>
             {
                 var options = context.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
@@ -187,6 +190,8 @@ public static class InfrastructureServiceCollectionExtensions
                     h.Username(options.Username);
                     h.Password(options.Password);
                 });
+
+                cfg.UseInMemoryOutbox(context);
 
                 cfg.ConfigureEndpoints(context);
             });

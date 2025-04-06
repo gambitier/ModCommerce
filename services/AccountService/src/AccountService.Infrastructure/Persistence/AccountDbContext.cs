@@ -13,6 +13,7 @@ public class AccountDbContext : DbContext
     public DbSet<UserProfileEntity> UserProfiles { get; set; }
     public DbSet<OrganizationEntity> Organizations { get; set; }
     public DbSet<OrganizationMemberInvitation> OrganizationMemberInvitations { get; set; }
+    public DbSet<UserRegistrationSagaState> UserRegistrationSagaStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
