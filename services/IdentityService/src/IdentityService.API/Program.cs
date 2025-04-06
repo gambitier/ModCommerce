@@ -85,7 +85,6 @@ if (app.Environment.IsDevelopment())
         // are properly disposed after the migration is complete
         var context = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
         context.Database.Migrate();
-        context.Database.EnsureCreated();
     }
 }
 
