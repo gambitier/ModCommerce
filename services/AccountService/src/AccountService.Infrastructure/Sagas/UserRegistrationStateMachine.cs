@@ -66,12 +66,6 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                     context.Saga.Email = context.Message.Email;
                     context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
                 })
-                .PublishAsync(context => context.Init<ConfirmUserEmailCommand>(new
-                {
-                    UserId = context.Saga.UserId,
-                    Email = context.Saga.Email,
-                    ConfirmedAt = context.Saga.EmailConfirmedAt
-                }))
                 .TransitionTo(EmailConfirmed)
         );
 
@@ -116,8 +110,18 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                     Username = context.Saga.Username,
                     CreatedAt = context.Saga.CreatedAt
                 }))
+                .PublishAsync(context => context.Init<ConfirmUserEmailCommand>(new
+                {
+                    UserId = context.Saga.UserId,
+                    Email = context.Saga.Email,
+                    ConfirmedAt = context.Saga.EmailConfirmedAt
+                }))
                 .TransitionTo(Completed)
         );
+
+        During(Completed,
+            Ignore(UserCreated),
+            Ignore(UserEmailConfirmed));
 
         // Set final state
         SetCompletedWhenFinalized();
