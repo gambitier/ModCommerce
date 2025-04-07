@@ -18,15 +18,6 @@ public class UserRegistrationStateConfiguration : IEntityTypeConfiguration<UserR
         builder.Property(x => x.UserId)
             .IsRequired();
 
-        builder.Property(x => x.Email)
-            .IsRequired();
-
-        builder.Property(x => x.Username)
-            .IsRequired();
-
-        builder.Property(x => x.CreatedAt)
-            .IsRequired();
-
         builder.HasIndex(x => x.UserId).IsUnique();
 
         // Order of the columns
