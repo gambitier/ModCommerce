@@ -51,7 +51,7 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                     Username = context.Saga.Username,
                     CreatedAt = context.Saga.CreatedAt
                 }))
-                .TransitionTo(Created),
+                .TransitionTo(UserProfileCreated),
 
             When(UserEmailConfirmed)
                 .Then(context =>
@@ -74,7 +74,7 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
         );
 
         // Handle UserEmailConfirmed when in Created state
-        During(Created,
+        During(UserProfileCreated,
             When(UserEmailConfirmed)
                 .Then(context =>
                 {
@@ -120,7 +120,7 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
     }
 
     // States
-    public State Created { get; private set; } = null!;
+    public State UserProfileCreated { get; private set; } = null!;
     public State EmailConfirmed { get; private set; } = null!;
     public State Completed { get; private set; } = null!;
 
