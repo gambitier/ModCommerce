@@ -88,6 +88,10 @@ public class UserProfileEntity : DomainEventEntity
     public void Activate()
     {
         Status = ProfileStatus.EmailVerified;
+        this.AddDomainEvent(new UserProfileEmailConfirmedDomainEvent(
+            this.Id,
+            this.UserId
+        ));
     }
 
     public void Update(UpdateUserProfileDomainModel updateUserProfileDomainModel)
