@@ -1,3 +1,4 @@
+using AccountService.Domain.Events.UserProfile;
 using AccountService.Infrastructure.MessageQueue.IdentityService.Constants;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -35,11 +36,21 @@ public class UserRegistrationStateMachineDefinition : SagaDefinition<UserRegistr
 
         if (endpointConfigurator is IRabbitMqReceiveEndpointConfigurator rabbitMqConfigurator)
         {
-            _logger.LogInformation("Binding to exchange: {Exchange}", EventConstants.UserCreatedEvent.Exchange);
-            rabbitMqConfigurator.Bind(EventConstants.UserCreatedEvent.Exchange);
+            var exchange = EventConstants.UserCreatedEvent.Exchange;
+            _logger.LogInformation("Binding to exchange: {Exchange}", exchange);
+            rabbitMqConfigurator.Bind(exchange);
 
-            _logger.LogInformation("Binding to exchange: {Exchange}", EventConstants.UserEmailConfirmedEvent.Exchange);
-            rabbitMqConfigurator.Bind(EventConstants.UserEmailConfirmedEvent.Exchange);
+            exchange = EventConstants.UserEmailConfirmedEvent.Exchange;
+            _logger.LogInformation("Binding to exchange: {Exchange}", exchange);
+            rabbitMqConfigurator.Bind(exchange);
+
+            exchange = UserProfileCreatedDomainEventConstants.Exchange;
+            _logger.LogInformation("Binding to exchange: {Exchange}", exchange);
+            rabbitMqConfigurator.Bind(exchange);
+
+            exchange = UserProfileEmailConfirmedDomainEventConstants.Exchange;
+            _logger.LogInformation("Binding to exchange: {Exchange}", exchange);
+            rabbitMqConfigurator.Bind(exchange);
         }
     }
 }
