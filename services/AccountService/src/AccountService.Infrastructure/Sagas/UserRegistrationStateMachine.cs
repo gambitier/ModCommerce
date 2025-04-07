@@ -10,6 +10,20 @@ namespace AccountService.Infrastructure.Sagas;
 
 /// <summary>
 /// State machine for handling user registration saga.
+/// ```mermaid
+/// stateDiagram-v2
+///     [*] --> Initial
+///     state Initial {
+///         [*] --> AwaitingUserCreated
+///         AwaitingUserCreated --> ProfileCreationPending : UserCreated
+///         AwaitingUserCreated --> ProfileEmailConfirmationPending : UserEmailConfirmed
+///     }
+///     ProfileCreationPending --> ProfileCreationCompleted : ProfileCreated
+///     ProfileCreationPending --> ProfileEmailConfirmationPending : ProfileCreated + EmailConfirmedAt exists
+///     ProfileCreationCompleted --> ProfileEmailConfirmationPending : UserEmailConfirmed
+///     ProfileEmailConfirmationPending --> ProfileEmailConfirmationCompleted : ProfileEmailConfirmed
+///     ProfileEmailConfirmationCompleted --> [*]
+/// ```
 /// </summary>
 public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistrationState>
 {
