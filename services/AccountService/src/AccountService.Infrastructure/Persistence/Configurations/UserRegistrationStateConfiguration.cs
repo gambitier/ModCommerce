@@ -28,5 +28,6 @@ public class UserRegistrationStateConfiguration : IEntityTypeConfiguration<UserR
         builder.Property(x => x.Username).HasColumnOrder(5);
         builder.Property(x => x.CreatedAt).HasColumnOrder(6);
         builder.Property(x => x.EmailConfirmedAt).HasColumnOrder(7);
+        builder.Property(x => x.IsProfileCreated).HasColumnOrder(8);
     }
 }

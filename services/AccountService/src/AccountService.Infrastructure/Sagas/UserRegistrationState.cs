@@ -41,4 +41,9 @@ public class UserRegistrationState : SagaStateMachineInstance
     /// Gets or sets the email confirmation date.
     /// </summary>
     public DateTime? EmailConfirmedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the profile has been created.
+    /// </summary>
+    public bool IsProfileCreated { get; set; }
 }
