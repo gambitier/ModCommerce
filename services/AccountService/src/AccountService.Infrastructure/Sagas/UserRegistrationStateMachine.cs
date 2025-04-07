@@ -66,6 +66,11 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .ThenAsync(HandleProfileCreated)
         );
 
+        During(ProfileCreationCompleted,
+            When(UserEmailConfirmed)
+                .ThenAsync(HandleUserEmailConfirmed)
+        );
+
         During(ProfileEmailConfirmationPending,
             When(ProfileEmailConfirmed)
                 .Then(HandleProfileEmailConfirmed)
@@ -109,13 +114,23 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
             nameof(UserEmailConfirmedEvent),
             context.Message.UserId);
 
-        context.Saga.UserId = context.Message.UserId;
-        context.Saga.Email = context.Message.Email;
-        context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
+        var (userId, email, confirmedAt) = context.Message;
+
+        context.Saga.UserId = userId;
+        context.Saga.Email = email;
+        context.Saga.EmailConfirmedAt = confirmedAt;
+
+        if (context.Saga.IsProfileCreated)
+        {
+            await context.Publish(new ConfirmUserEmailCommand
+            {
+                UserId = userId,
+                Email = email,
+                ConfirmedAt = confirmedAt
+            });
+        }
 
         await context.TransitionToState(ProfileEmailConfirmationPending);
-
-        // NOTE: We should not publish the UserEmailConfirmedEvent here, because we want to wait for the ProfileCreatedEvent
     }
 
     private async Task HandleProfileCreated(BehaviorContext<UserRegistrationState, UserProfileCreatedDomainEvent> context)
@@ -124,15 +139,15 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
             "User profile created for user {UserId}",
             context.Message.UserId);
 
+        context.Saga.IsProfileCreated = true;
+
         if (context.Saga.EmailConfirmedAt != null)
         {
-            var confirmedAt = context.Saga.EmailConfirmedAt.Value;
-
             await context.Publish(new ConfirmUserEmailCommand
             {
                 UserId = context.Message.UserId,
                 Email = context.Saga.Email,
-                ConfirmedAt = confirmedAt
+                ConfirmedAt = context.Saga.EmailConfirmedAt.Value
             });
 
             await context.TransitionToState(ProfileEmailConfirmationPending);
