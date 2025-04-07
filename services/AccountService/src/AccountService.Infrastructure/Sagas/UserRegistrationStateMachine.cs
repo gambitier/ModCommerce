@@ -58,21 +58,19 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .ThenAsync(HandleUserCreated),
 
             When(UserEmailConfirmed)
-                .Then(HandleUserEmailConfirmed)
-                .TransitionTo(ProfileEmailConfirmationPending)
+                .ThenAsync(HandleUserEmailConfirmed)
         );
 
         During(ProfileCreationPending,
             When(ProfileCreated)
                 .ThenAsync(HandleProfileCreated)
-                .TransitionTo(ProfileCreationCompleted)
         );
 
         During(ProfileEmailConfirmationPending,
             When(ProfileEmailConfirmed)
                 .Then(HandleProfileEmailConfirmed)
                 .TransitionTo(ProfileEmailConfirmationCompleted)
-                .Finalize(),
+                .Finalize(), // state is removed from saga persistence store
 
             When(UserCreated)
                 .ThenAsync(HandleUserCreated)
@@ -104,7 +102,7 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
         await context.TransitionToState(ProfileCreationPending);
     }
 
-    private void HandleUserEmailConfirmed(BehaviorContext<UserRegistrationState, UserEmailConfirmedEvent> context)
+    private async Task HandleUserEmailConfirmed(BehaviorContext<UserRegistrationState, UserEmailConfirmedEvent> context)
     {
         _logger.LogInformation(
             "Received {Event} for user {UserId} in Initial state",
@@ -114,6 +112,8 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
         context.Saga.UserId = context.Message.UserId;
         context.Saga.Email = context.Message.Email;
         context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
+
+        await context.TransitionToState(ProfileEmailConfirmationPending);
 
         // NOTE: We should not publish the UserEmailConfirmedEvent here, because we want to wait for the ProfileCreatedEvent
     }
@@ -136,6 +136,10 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
             });
 
             await context.TransitionToState(ProfileEmailConfirmationPending);
+        }
+        else
+        {
+            await context.TransitionToState(ProfileCreationCompleted);
         }
     }
 
