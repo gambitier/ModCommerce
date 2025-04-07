@@ -53,7 +53,6 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
 
     private void ConfigureStateTransitions()
     {
-        // Initial state transitions
         Initially(
             When(UserCreated)
                 .ThenAsync(HandleUserCreated),
@@ -63,14 +62,12 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .TransitionTo(ProfileEmailConfirmationPending)
         );
 
-        // ProfileCreationPending state transitions
         During(ProfileCreationPending,
             When(ProfileCreated)
                 .ThenAsync(HandleProfileCreated)
                 .TransitionTo(ProfileCreationCompleted)
         );
 
-        // ProfileEmailConfirmationPending state transitions
         During(ProfileEmailConfirmationPending,
             When(ProfileEmailConfirmed)
                 .Then(HandleProfileEmailConfirmed)
