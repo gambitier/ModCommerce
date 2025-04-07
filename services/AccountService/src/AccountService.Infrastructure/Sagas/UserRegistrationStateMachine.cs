@@ -4,6 +4,7 @@ using AccountService.Infrastructure.MessageQueue.IdentityService.Events.UserCrea
 using AccountService.Infrastructure.MessageQueue.IdentityService.Events.UserEmailConfirmed;
 using AccountService.Domain.Utils;
 using AccountService.Infrastructure.Sagas.Commands;
+using AccountService.Domain.Events.UserProfile;
 
 namespace AccountService.Infrastructure.Sagas;
 
@@ -26,113 +27,137 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
         // Configure the state machine
         InstanceState(x => x.CurrentState);
 
-        // Define events
-        Event(() => UserCreated, x => x.CorrelateById(context => GuidUtils.CreateDeterministicGuid(context.Message.UserId)));
-        Event(() => UserEmailConfirmed, x => x.CorrelateById(context => GuidUtils.CreateDeterministicGuid(context.Message.UserId)));
+        // Define events with correlation
+        ConfigureEvents();
 
-        // Initially block handles both UserCreated and UserEmailConfirmed as first event
-        Initially(
-            When(UserCreated)
-                .Then(context =>
-                {
-                    _logger.LogInformation(
-                        "Received {Event} for user {UserId} in Initial state",
-                        nameof(UserCreatedEvent),
-                        context.Message.UserId);
+        // Configure state transitions
+        ConfigureStateTransitions();
 
-                    context.Saga.UserId = context.Message.UserId;
-                    context.Saga.Email = context.Message.Email;
-                    context.Saga.Username = context.Message.Username;
-                    context.Saga.CreatedAt = context.Message.CreatedAt;
-                })
-                .PublishAsync(context => context.Init<CreateUserProfileCommand>(new
-                {
-                    UserId = context.Saga.UserId,
-                    Email = context.Saga.Email,
-                    Username = context.Saga.Username,
-                    CreatedAt = context.Saga.CreatedAt
-                }))
-                .TransitionTo(UserProfileCreated),
-
-            When(UserEmailConfirmed)
-                .Then(context =>
-                {
-                    _logger.LogInformation(
-                        "Received {Event} for user {UserId} in Initial state",
-                        nameof(UserEmailConfirmedEvent),
-                        context.Message.UserId);
-
-                    context.Saga.UserId = context.Message.UserId;
-                    context.Saga.Email = context.Message.Email;
-                    context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
-                })
-                .TransitionTo(EmailConfirmed)
-        );
-
-        // Handle UserEmailConfirmed when in Created state
-        During(UserProfileCreated,
-            When(UserEmailConfirmed)
-                .Then(context =>
-                {
-                    _logger.LogInformation(
-                        "Received {Event} for user {UserId} in Created state",
-                        nameof(UserEmailConfirmedEvent),
-                        context.Message.UserId);
-
-                    context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
-                })
-                .PublishAsync(context => context.Init<ConfirmUserEmailCommand>(new
-                {
-                    UserId = context.Saga.UserId,
-                    Email = context.Saga.Email,
-                    ConfirmedAt = context.Saga.EmailConfirmedAt
-                }))
-                .TransitionTo(Completed)
-        );
-
-        // Handle UserCreated when in EmailConfirmed state
-        During(EmailConfirmed,
-            When(UserCreated)
-                .Then(context =>
-                {
-                    _logger.LogInformation(
-                        "Received {Event} for user {UserId} in EmailConfirmed state",
-                        nameof(UserCreatedEvent),
-                        context.Message.UserId);
-
-                    context.Saga.Username = context.Message.Username;
-                    context.Saga.CreatedAt = context.Message.CreatedAt;
-                })
-                .PublishAsync(context => context.Init<CreateUserProfileCommand>(new
-                {
-                    UserId = context.Saga.UserId,
-                    Email = context.Saga.Email,
-                    Username = context.Saga.Username,
-                    CreatedAt = context.Saga.CreatedAt
-                }))
-                .PublishAsync(context => context.Init<ConfirmUserEmailCommand>(new
-                {
-                    UserId = context.Saga.UserId,
-                    Email = context.Saga.Email,
-                    ConfirmedAt = context.Saga.EmailConfirmedAt
-                }))
-                .TransitionTo(Completed)
-        );
-
-        During(Completed,
-            Ignore(UserCreated),
-            Ignore(UserEmailConfirmed));
-
-        // Set final state
         SetCompletedWhenFinalized();
     }
 
+    private void ConfigureEvents()
+    {
+        Event(() => UserCreated, x => x.CorrelateById(context =>
+            GuidUtils.CreateDeterministicGuid(context.Message.UserId)));
+
+        Event(() => UserEmailConfirmed, x => x.CorrelateById(context =>
+            GuidUtils.CreateDeterministicGuid(context.Message.UserId)));
+
+        Event(() => ProfileCreated, x => x.CorrelateById(context =>
+            GuidUtils.CreateDeterministicGuid(context.Message.UserId)));
+
+        Event(() => ProfileEmailConfirmed, x => x.CorrelateById(context =>
+            GuidUtils.CreateDeterministicGuid(context.Message.UserId)));
+    }
+
+    private void ConfigureStateTransitions()
+    {
+        // Initial state transitions
+        Initially(
+            When(UserCreated)
+                .ThenAsync(HandleUserCreated),
+
+            When(UserEmailConfirmed)
+                .Then(HandleUserEmailConfirmed)
+                .TransitionTo(ProfileEmailConfirmationPending)
+        );
+
+        // ProfileCreationPending state transitions
+        During(ProfileCreationPending,
+            When(ProfileCreated)
+                .ThenAsync(HandleProfileCreated)
+                .TransitionTo(ProfileCreationCompleted)
+        );
+
+        // ProfileEmailConfirmationPending state transitions
+        During(ProfileEmailConfirmationPending,
+            When(ProfileEmailConfirmed)
+                .Then(HandleProfileEmailConfirmed)
+                .TransitionTo(ProfileEmailConfirmationCompleted)
+                .Finalize(),
+
+            When(UserCreated)
+                .ThenAsync(HandleUserCreated)
+        );
+    }
+
+    private async Task HandleUserCreated(BehaviorContext<UserRegistrationState, UserCreatedEvent> context)
+    {
+        _logger.LogInformation(
+            "Received {Event} for user {UserId} in Initial state",
+            nameof(UserCreatedEvent),
+            context.Message.UserId);
+
+        var (userId, email, username, createdAt) = context.Message;
+
+        context.Saga.UserId = userId;
+        context.Saga.Email = email;
+        context.Saga.Username = username;
+        context.Saga.CreatedAt = createdAt;
+
+        await context.Publish(new CreateUserProfileCommand
+        {
+            UserId = userId,
+            Email = email,
+            Username = username,
+            CreatedAt = createdAt
+        });
+
+        await context.TransitionToState(ProfileCreationPending);
+    }
+
+    private void HandleUserEmailConfirmed(BehaviorContext<UserRegistrationState, UserEmailConfirmedEvent> context)
+    {
+        _logger.LogInformation(
+            "Received {Event} for user {UserId} in Initial state",
+            nameof(UserEmailConfirmedEvent),
+            context.Message.UserId);
+
+        context.Saga.UserId = context.Message.UserId;
+        context.Saga.Email = context.Message.Email;
+        context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
+
+        // NOTE: We should not publish the UserEmailConfirmedEvent here, because we want to wait for the ProfileCreatedEvent
+    }
+
+    private async Task HandleProfileCreated(BehaviorContext<UserRegistrationState, UserProfileCreatedDomainEvent> context)
+    {
+        _logger.LogInformation(
+            "User profile created for user {UserId}",
+            context.Message.UserId);
+
+        if (context.Saga.EmailConfirmedAt != null)
+        {
+            var confirmedAt = context.Saga.EmailConfirmedAt.Value;
+
+            await context.Publish(new ConfirmUserEmailCommand
+            {
+                UserId = context.Message.UserId,
+                Email = context.Saga.Email,
+                ConfirmedAt = confirmedAt
+            });
+
+            await context.TransitionToState(ProfileEmailConfirmationPending);
+        }
+    }
+
+    private void HandleProfileEmailConfirmed(BehaviorContext<UserRegistrationState, UserProfileEmailConfirmedDomainEvent> context)
+    {
+        _logger.LogInformation(
+            "User profile email confirmed for user {UserId}",
+            context.Message.UserId);
+    }
+
     // States
-    public State UserProfileCreated { get; private set; } = null!;
-    public State EmailConfirmed { get; private set; } = null!;
-    public State Completed { get; private set; } = null!;
+    public State ProfileCreationPending { get; private set; } = null!;
+    public State ProfileEmailConfirmationPending { get; private set; } = null!;
+    public State ProfileEmailConfirmationCompleted { get; private set; } = null!;
+    public State ProfileCreationCompleted { get; private set; } = null!;
 
     // Events
     public Event<UserCreatedEvent> UserCreated { get; private set; } = null!;
     public Event<UserEmailConfirmedEvent> UserEmailConfirmed { get; private set; } = null!;
+    public Event<UserProfileCreatedDomainEvent> ProfileCreated { get; private set; } = null!;
+    public Event<UserProfileEmailConfirmedDomainEvent> ProfileEmailConfirmed { get; private set; } = null!;
 }
