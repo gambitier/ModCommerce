@@ -36,7 +36,8 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .Then(context =>
                 {
                     _logger.LogInformation(
-                        "Received UserCreatedEvent for user {UserId} in Initial state",
+                        "Received {Event} for user {UserId} in Initial state",
+                        nameof(UserCreatedEvent),
                         context.Message.UserId);
 
                     context.Saga.UserId = context.Message.UserId;
@@ -57,7 +58,8 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .Then(context =>
                 {
                     _logger.LogInformation(
-                        "Received UserEmailConfirmedEvent for user {UserId} in Initial state",
+                        "Received {Event} for user {UserId} in Initial state",
+                        nameof(UserEmailConfirmedEvent),
                         context.Message.UserId);
 
                     context.Saga.UserId = context.Message.UserId;
@@ -79,7 +81,8 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .Then(context =>
                 {
                     _logger.LogInformation(
-                        "Received UserEmailConfirmedEvent for user {UserId} in Created state",
+                        "Received {Event} for user {UserId} in Created state",
+                        nameof(UserEmailConfirmedEvent),
                         context.Message.UserId);
 
                     context.Saga.EmailConfirmedAt = context.Message.ConfirmedAt;
@@ -99,7 +102,8 @@ public class UserRegistrationStateMachine : MassTransitStateMachine<UserRegistra
                 .Then(context =>
                 {
                     _logger.LogInformation(
-                        "Received UserCreatedEvent for user {UserId} in EmailConfirmed state",
+                        "Received {Event} for user {UserId} in EmailConfirmed state",
+                        nameof(UserCreatedEvent),
                         context.Message.UserId);
 
                     context.Saga.Username = context.Message.Username;
